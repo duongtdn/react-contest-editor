@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1,  shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>react-contest-editor</title>
+
+    <style>
+
+      html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}
+      html,body{font-size: 16px; line-height: 1.6em; height: 100%; margin: 0; }
+			.light {background-color: #f9f9f9; color: #313131}
+			.dark {background-color: #313131; color: #fdf5e6}
+
+      .read-only-code-line {
+        cursor: pointer !important;
+			  opacity: .8;
+      }
+
+			.light .read-only-code-line {
+			  background: #f1f1f1;
+			}
+
+			.dark .read-only-code-line {
+			  background: #414141;
+			}
+
+			.read-only-code-text {
+        cursor: pointer;
+        /* opacity: .8; */
+      }
+
+    </style>
+
+  </head>
+
+  <body class="dark">
+    <div id = "root"></div>
+    <script type="text/javascript" src="/assets/app.js" ></script>
+  </body>
+
+</html>

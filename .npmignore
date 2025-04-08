@@ -1,0 +1,10 @@
+src/
+example/
+test/
+node_modules/
+webpack.*
+npm-debug.*
+.github/
+.vscode/
+**/__tests__/
+**/__mocks__/
