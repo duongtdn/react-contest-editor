@@ -248,6 +248,7 @@ const styles = {
     alignItems: 'center',
     gap: '6px',
     borderBottom: '2px solid transparent',
+		fontFamily: 'consolas, monospace',
   },
   activeTab: {
     backgroundColor: '#444',
