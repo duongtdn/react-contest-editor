@@ -2,146 +2,13 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import ScrollBox from '@duongtdn/react-scrollbox';
 import { FaCopy, FaTrash, FaCheck } from 'react-icons/fa';
 
-const createStyles = (theme = 'github-dark') => {
-  const isDarkTheme = theme.includes('dark');
-
-  // Theme-specific colors
-  const colors = {
-    background: isDarkTheme ? '#1e1e1e' : '#f8f8f8',
-    headerBg: isDarkTheme ? '#333' : '#eaeaea',
-    text: isDarkTheme ? '#f0f0f0' : '#333',
-    promptColor: isDarkTheme ? '#4CAF50' : '#0c7d15',
-    buttonBorder: isDarkTheme ? '#666' : '#ddd',
-    buttonHoverBg: isDarkTheme ? '#444' : '#e0e0e0',
-    buttonHoverBorder: isDarkTheme ? '#888' : '#bbb',
-    scrollbarThumb: isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-    scrollbarThumbHover: isDarkTheme ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
-  };
-
-  return {
-    container: {
-      border: `1px solid #666`,
-			borderTop: 'none',
-      borderRadius: '0 0 4px 4px',
-      overflow: 'hidden',
-      fontFamily: 'monospace',
-      backgroundColor: colors.background,
-      color: colors.text,
-      width: '100%',
-      height: '300px',
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    header: {
-      backgroundColor: colors.headerBg,
-      padding: '8px 12px',
-      borderBottom: `1px solid ${isDarkTheme ? '#444' : '#aaa'}`,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    title: {
-      margin: 0,
-      fontSize: '14px',
-      fontWeight: 'bold',
-      color: colors.text,
-    },
-    buttons: {
-      display: 'flex',
-      gap: '8px',
-    },
-    button: {
-      backgroundColor: 'transparent',
-      border: `1px solid ${colors.buttonBorder}`,
-      borderRadius: '3px',
-      color: colors.text,
-      padding: '4px',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '28px',
-      height: '28px',
-    },
-    buttonHover: {
-      backgroundColor: colors.buttonHoverBg,
-      borderColor: colors.buttonHoverBorder,
-    },
-    tooltipContainer: {
-      position: 'relative',
-      display: 'inline-block',
-    },
-    tooltip: {
-      position: 'absolute',
-      bottom: '-25px',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: 'white',
-      padding: '3px 6px',
-      borderRadius: '3px',
-      fontSize: '10px',
-      whiteSpace: 'nowrap',
-      zIndex: 10,
-      pointerEvents: 'none',
-    },
-    terminalContent: {
-      flex: 1,
-      padding: '0',
-      margin: '0',
-      overflow: 'hidden',
-    },
-    scrollBoxContent: {
-      padding: '10px',
-    },
-    line: {
-      margin: '3px 0',
-      lineHeight: '1.4',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'break-all',
-    },
-    promptLine: {
-      display: 'flex',
-    },
-    prompt: {
-      color: colors.promptColor,
-      marginRight: '8px',
-    },
-    input: {
-      backgroundColor: 'transparent',
-      border: 'none',
-      color: colors.text,
-      outline: 'none',
-      font: 'inherit',
-      flex: 1,
-    },
-    scrollbarStyles: {
-      '&::-webkit-scrollbar': {
-        width: '8px',
-        height: '8px',
-      },
-      '&::-webkit-scrollbar-track': {
-        background: 'transparent',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        background: colors.scrollbarThumb,
-        borderRadius: '4px',
-      },
-      '&::-webkit-scrollbar-thumb:hover': {
-        background: colors.scrollbarThumbHover,
-      }
-    }
-  };
-};
-
 const Terminal = ({
   title = 'Terminal',
   history = [],
   onCommand = null,
   prompt = '$ ',
   readOnly = false,
-  theme = 'github-dark' // Added theme prop with default
+  theme = 'github-dark'
 }) => {
   const [lines, setLines] = useState(history);
   const [currentInput, setCurrentInput] = useState('');
@@ -303,3 +170,136 @@ const Terminal = ({
 };
 
 export default Terminal;
+
+const createStyles = (theme = 'github-dark') => {
+  const isDarkTheme = theme.includes('dark');
+
+  // Theme-specific colors
+  const colors = {
+    background: isDarkTheme ? '#1e1e1e' : '#f8f8f8',
+    headerBg: isDarkTheme ? '#333' : '#eaeaea',
+    text: isDarkTheme ? '#f0f0f0' : '#333',
+    promptColor: isDarkTheme ? '#4CAF50' : '#0c7d15',
+    buttonBorder: isDarkTheme ? '#666' : '#ddd',
+    buttonHoverBg: isDarkTheme ? '#444' : '#e0e0e0',
+    buttonHoverBorder: isDarkTheme ? '#888' : '#bbb',
+    scrollbarThumb: isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+    scrollbarThumbHover: isDarkTheme ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+  };
+
+  return {
+    container: {
+      border: `1px solid #666`,
+			borderTop: 'none',
+      borderRadius: '0 0 4px 4px',
+      overflow: 'hidden',
+      fontFamily: 'monospace',
+      backgroundColor: colors.background,
+      color: colors.text,
+      width: '100%',
+      height: '300px',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    header: {
+      backgroundColor: colors.headerBg,
+      padding: '8px 12px',
+      borderBottom: `1px solid ${isDarkTheme ? '#444' : '#aaa'}`,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    title: {
+      margin: 0,
+      fontSize: '14px',
+      fontWeight: 'bold',
+      color: colors.text,
+    },
+    buttons: {
+      display: 'flex',
+      gap: '8px',
+    },
+    button: {
+      backgroundColor: 'transparent',
+      border: `1px solid ${colors.buttonBorder}`,
+      borderRadius: '3px',
+      color: colors.text,
+      padding: '4px',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '28px',
+      height: '28px',
+    },
+    buttonHover: {
+      backgroundColor: colors.buttonHoverBg,
+      borderColor: colors.buttonHoverBorder,
+    },
+    tooltipContainer: {
+      position: 'relative',
+      display: 'inline-block',
+    },
+    tooltip: {
+      position: 'absolute',
+      bottom: '-25px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: 'white',
+      padding: '3px 6px',
+      borderRadius: '3px',
+      fontSize: '10px',
+      whiteSpace: 'nowrap',
+      zIndex: 10,
+      pointerEvents: 'none',
+    },
+    terminalContent: {
+      flex: 1,
+      padding: '0',
+      margin: '0',
+      overflow: 'hidden',
+    },
+    scrollBoxContent: {
+      padding: '10px',
+    },
+    line: {
+      margin: '3px 0',
+      lineHeight: '1.4',
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-all',
+    },
+    promptLine: {
+      display: 'flex',
+    },
+    prompt: {
+      color: colors.promptColor,
+      marginRight: '8px',
+    },
+    input: {
+      backgroundColor: 'transparent',
+      border: 'none',
+      color: colors.text,
+      outline: 'none',
+      font: 'inherit',
+      flex: 1,
+    },
+    scrollbarStyles: {
+      '&::-webkit-scrollbar': {
+        width: '8px',
+        height: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: colors.scrollbarThumb,
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb:hover': {
+        background: colors.scrollbarThumbHover,
+      }
+    }
+  };
+};
