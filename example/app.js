@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { FaPlay } from 'react-icons/fa';
 
 import Editor from './src/components/Editor';
 import Terminal from './src/components/Terminal';
@@ -185,6 +186,9 @@ const App = () => {
         theme={theme}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
+        submitButtonText="Run Code"
+        submittingButtonText="Running..."
+        SubmitIcon={FaPlay}
       />
       <Terminal
         title="Interactive Terminal"
@@ -203,6 +207,7 @@ const App = () => {
           <li>Monaco Editor with syntax highlighting for different languages</li>
           <li>Auto-resizing height based on content</li>
           <li>Theme switching via the theme selector</li>
+          <li>Customizable submit button text and icon</li>
           <li>Interactive terminal with command history</li>
           <li>Scrollable terminal output using react-scrollbox</li>
         </ul>

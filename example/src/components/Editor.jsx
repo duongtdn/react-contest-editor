@@ -6,7 +6,15 @@ import { FaPaperPlane } from 'react-icons/fa';
 import themes from 'monaco-ext/dist/themes';
 ExtendableCodeEditor.loadThemes(() => Promise.resolve(themes));
 
-const Editor = ({ files, theme = 'github-dark', onSubmit, isSubmitting = false }) => {
+const Editor = ({
+  files,
+  theme = 'github-dark',
+  onSubmit,
+  isSubmitting = false,
+  submitButtonText = 'Submit',
+  submittingButtonText = 'Submitting...',
+  SubmitIcon = FaPaperPlane
+}) => {
   const [selectedFileIndex, setSelectedFileIndex] = useState(0);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const containerRef = useRef(null);
@@ -192,8 +200,8 @@ const Editor = ({ files, theme = 'github-dark', onSubmit, isSubmitting = false }
             disabled={isSubmitting}
             title="Submit code"
           >
-            <FaPaperPlane style={styles.submitIcon} />
-            <span style={styles.submitText}>{isSubmitting ? 'Submitting...' : 'Submit'}</span>
+            <SubmitIcon style={styles.submitIcon} />
+            <span style={styles.submitText}>{isSubmitting ? submittingButtonText : submitButtonText}</span>
           </button>
         </div>
       </div>
