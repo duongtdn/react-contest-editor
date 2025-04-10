@@ -159,8 +159,8 @@ const App = () => {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '20px auto', padding: '20px' }}>
-      <h1>React Contest Editor Example</h1>
+    <div style={{ width: '100%', margin: '12px auto', padding: '0 20px' }}>
+      <h2>React Contest Editor Example</h2>
       <p>A lightweight React-based code editor for live coding contests, built on monaco-ext.</p>
 
       {/* Theme selector */}
@@ -179,7 +179,6 @@ const App = () => {
         </select>
       </div>
 
-      <h2>Example Editor with Terminal</h2>
       <ContestEditor
 				// Editor props
         files={files}

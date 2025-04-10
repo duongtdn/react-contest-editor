@@ -247,13 +247,13 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    borderBottom: '2px solid transparent',
+    borderBottom: '4px solid transparent',
 		fontFamily: 'consolas, monospace',
   },
   activeTab: {
     backgroundColor: '#444',
     color: 'white',
-    borderBottom: '2px solid #007acc',
+    borderBottom: '4px solid #007acc',
   },
   lockIcon: {
     fontSize: '12px',
@@ -261,7 +261,7 @@ const styles = {
   },
   editorContainer: {
     width: '100%',
-    minHeight: '200px',
+    minHeight: '250px',
     position: 'relative',
   },
   editorInstance: {
