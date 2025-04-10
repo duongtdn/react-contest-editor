@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import Editor from './src/components/Editor';
+import Terminal from './src/components/Terminal';
 
 // Available themes for the editor
 const THEMES = [
@@ -39,6 +40,10 @@ const files = [
 const App = () => {
   const [theme, setTheme] = useState('github-dark');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [terminalHistory, setTerminalHistory] = useState([
+    { type: 'output', content: 'Welcome to the Terminal! Type a command and press Enter.' },
+    { type: 'output', content: 'Try using commands like "help", "run", or "clear".' }
+  ]);
 
   const handleThemeChange = (e) => {
     setTheme(e.target.value);
@@ -50,11 +55,62 @@ const App = () => {
 
     console.log("Submitting...", editorContents);
 
+    // Add submission to terminal
+    const newTerminalEntry = {
+      type: 'output',
+      content: `Submitting code at ${new Date().toLocaleTimeString()}...`
+    };
+    setTerminalHistory(prev => [...prev, newTerminalEntry]);
+
     // Simulate an API request with a 2-second timeout
     setTimeout(() => {
       console.log("Submit complete!", editorContents);
       setIsSubmitting(false);
+
+      // Add completion message to terminal
+      setTerminalHistory(prev => [
+        ...prev,
+        { type: 'output', content: 'Submission successful!' },
+        { type: 'output', content: `Files submitted: ${editorContents.map(file => file.filename).join(', ')}` }
+      ]);
     }, 2000);
+  };
+
+  const handleTerminalCommand = (command, callback) => {
+    // Simple terminal command handling
+    setTimeout(() => {
+      switch(command.toLowerCase()) {
+        case 'help':
+          callback([
+            'Available commands:',
+            '  help    - Display this help message',
+            '  run     - Simulate running the code',
+            '  clear   - Clear the terminal',
+            '  about   - Show information about the editor'
+          ]);
+          break;
+        case 'run':
+          callback([
+            'Running code...',
+            'Output:',
+            '> Hello from the simulated runtime!'
+          ]);
+          break;
+        case 'clear':
+          setTerminalHistory([]);
+          callback(null);
+          break;
+        case 'about':
+          callback([
+            'React Contest Editor with Integrated Terminal',
+            'Version: 1.0.0',
+            'Built with React and @duongtdn/react-scrollbox'
+          ]);
+          break;
+        default:
+          callback([`Command not found: ${command}`]);
+      }
+    }, 300); // Small delay to simulate processing
   };
 
   // Theme selector styles
@@ -107,6 +163,14 @@ const App = () => {
         isSubmitting={isSubmitting}
       />
 
+      <Terminal
+        title="Interactive Terminal"
+        history={terminalHistory}
+        onCommand={handleTerminalCommand}
+        prompt="$ "
+        theme={theme}
+      />
+
       <div style={{ marginTop: '20px', fontSize: '14px', color: '#666' }}>
         <p><strong>Features demonstrated:</strong></p>
         <ul>
@@ -116,6 +180,8 @@ const App = () => {
           <li>Monaco Editor with syntax highlighting for different languages</li>
           <li>Auto-resizing height based on content</li>
           <li>Theme switching via the theme selector</li>
+          <li>Interactive terminal with command history</li>
+          <li>Scrollable terminal output using react-scrollbox</li>
         </ul>
       </div>
     </div>
