@@ -162,7 +162,6 @@ const App = () => {
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
       />
-
       <Terminal
         title="Interactive Terminal"
         history={terminalHistory}

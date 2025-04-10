@@ -9,8 +9,8 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    border: '1px solid #444',
-    borderRadius: '4px',
+    border: '1px solid #666',
+    borderRadius: '4px 4px 0 0',
     overflow: 'hidden',
     fontFamily: 'sans-serif',
   },

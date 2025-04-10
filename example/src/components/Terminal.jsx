@@ -8,8 +8,7 @@ const createStyles = (theme = 'github-dark') => {
   // Theme-specific colors
   const colors = {
     background: isDarkTheme ? '#1e1e1e' : '#f8f8f8',
-    headerBg: isDarkTheme ? '#333' : '#e8e8e8',
-    border: isDarkTheme ? '#444' : '#ccc',
+    headerBg: isDarkTheme ? '#333' : '#eaeaea',
     text: isDarkTheme ? '#f0f0f0' : '#333',
     promptColor: isDarkTheme ? '#4CAF50' : '#0c7d15',
     buttonBorder: isDarkTheme ? '#666' : '#ddd',
@@ -21,8 +20,9 @@ const createStyles = (theme = 'github-dark') => {
 
   return {
     container: {
-      border: `1px solid ${colors.border}`,
-      borderRadius: '4px',
+      border: `1px solid #666`,
+			borderTop: 'none',
+      borderRadius: '0 0 4px 4px',
       overflow: 'hidden',
       fontFamily: 'monospace',
       backgroundColor: colors.background,
@@ -35,7 +35,7 @@ const createStyles = (theme = 'github-dark') => {
     header: {
       backgroundColor: colors.headerBg,
       padding: '8px 12px',
-      borderBottom: `1px solid ${colors.border}`,
+      borderBottom: `1px solid ${isDarkTheme ? '#444' : '#aaa'}`,
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
