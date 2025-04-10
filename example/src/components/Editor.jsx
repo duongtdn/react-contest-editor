@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { ExtendableCodeEditor } from 'monaco-ext';
 import { ReadOnlyLines, AutoResizeHeight } from 'monaco-ext/dist/features';
+import { FaPaperPlane } from 'react-icons/fa';
 
 import themes from 'monaco-ext/dist/themes';
 ExtendableCodeEditor.loadThemes(() => Promise.resolve(themes));
@@ -189,8 +190,10 @@ const Editor = ({ files, theme = 'github-dark', onSubmit, isSubmitting = false }
             onMouseEnter={() => !isSubmitting && setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
             disabled={isSubmitting}
+            title="Submit code"
           >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
+            <FaPaperPlane style={styles.submitIcon} />
+            <span style={styles.submitText}>{isSubmitting ? 'Submitting...' : 'Submit'}</span>
           </button>
         </div>
       </div>
@@ -290,6 +293,9 @@ const styles = {
     fontWeight: 'bold',
     height: 'fit-content',
     transition: 'background-color 0.3s ease, opacity 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
   },
   submitButtonHover: {
     backgroundColor: '#0062a3',
@@ -299,7 +305,13 @@ const styles = {
     backgroundColor: '#7f7f7f',
     cursor: 'not-allowed',
     opacity: 0.7,
-  }
+  },
+  submitIcon: {
+    fontSize: '14px',
+  },
+  submitText: {
+    marginLeft: '4px',
+  },
 };
 
 const injectCss = () => {
