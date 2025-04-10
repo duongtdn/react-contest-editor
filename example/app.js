@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FaPlay } from 'react-icons/fa';
 
-import Editor from './src/components/Editor';
-import Terminal from './src/components/Terminal';
+import ContestEditor from './src/components/ContestEditor';
 
 // Available themes for the editor
 const THEMES = [
@@ -180,22 +179,23 @@ const App = () => {
         </select>
       </div>
 
-      <h2>Example Editor</h2>
-      <Editor
+      <h2>Example Editor with Terminal</h2>
+      <ContestEditor
+				// Editor props
         files={files}
-        theme={theme}
+        editorTheme={theme}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         submitButtonText="Run Code"
         submittingButtonText="Running..."
-        SubmitIcon={FaPlay}
-      />
-      <Terminal
-        title="Interactive Terminal"
-        history={terminalHistory}
+				SubmitIcon={FaPlay}
+
+				// Terminal props
+        terminalTitle="Interactive Terminal"
+        terminalHistory={terminalHistory}
         onCommand={handleTerminalCommand}
-        prompt="$ "
-        theme={theme}
+        terminalPrompt="$ "
+				terminalReadOnly={false}
       />
 
       <div style={{ marginTop: '20px', fontSize: '14px', color: '#666' }}>
@@ -210,6 +210,7 @@ const App = () => {
           <li>Customizable submit button text and icon</li>
           <li>Interactive terminal with command history</li>
           <li>Scrollable terminal output using react-scrollbox</li>
+          <li>Vertically stacked editor and terminal using ContestEditor</li>
         </ul>
       </div>
     </div>
