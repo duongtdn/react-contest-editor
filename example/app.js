@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import Editor from './src/components/Editor/Editor';
+import Editor from './src/components/Editor';
 
 // Available themes for the editor
 const THEMES = [
