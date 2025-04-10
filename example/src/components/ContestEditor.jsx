@@ -1,4 +1,3 @@
-// filepath: /home/duongtdn/work/duongtdn/react-contest-editor/example/src/components/ContestEditor.jsx
 import React, { useState } from 'react';
 import { FaPaperPlane, FaList, FaFileAlt, FaInfo } from 'react-icons/fa';
 import Editor from './Editor';
@@ -41,10 +40,25 @@ const ContestEditor = ({
       title: 'Task List',
       content: <div>Task list goes here</div>
     }
-  ]
+  ],
+
+  // Panel state callbacks
+  onTabPanelFoldChange = null
 }) => {
   // Keep theme synchronized between editor and terminal
   const theme = editorTheme;
+
+  // Track TabPanel folded state
+  const [isTabPanelFolded, setIsTabPanelFolded] = useState(false);
+
+  // Handle fold state changes
+  const handleTabPanelFoldChange = (foldedState) => {
+    setIsTabPanelFolded(foldedState);
+    // Call external handler if provided
+    if (onTabPanelFoldChange) {
+      onTabPanelFoldChange(foldedState);
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -54,6 +68,7 @@ const ContestEditor = ({
         defaultActiveTab={0}
         width={tabPanelWidth}
         theme={theme}
+        onFoldChange={handleTabPanelFoldChange}
       />
 
       {/* Editor and Terminal Stack on the right */}

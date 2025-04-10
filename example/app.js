@@ -44,9 +44,26 @@ const App = () => {
     { type: 'output', content: 'Welcome to the Terminal! Type a command and press Enter.' },
     { type: 'output', content: 'Try using commands like "help", "run", or "clear".' }
   ]);
+  // Add state to track TabPanel fold status
+  const [isTabPanelFolded, setIsTabPanelFolded] = useState(false);
 
   const handleThemeChange = (e) => {
     setTheme(e.target.value);
+  };
+
+  // Handler for TabPanel fold changes
+  const handleTabPanelFoldChange = (foldedState) => {
+    setIsTabPanelFolded(foldedState);
+    console.log(`TabPanel is now ${foldedState ? 'folded' : 'unfolded'}`);
+
+    // Add a message to the terminal to demonstrate the notification
+    setTerminalHistory(prev => [
+      ...prev,
+      {
+        type: 'system',
+        content: `TabPanel was ${foldedState ? 'collapsed' : 'expanded'} at ${new Date().toLocaleTimeString()}`
+      }
+    ]);
   };
 
   const handleSubmit = (editorContents) => {
@@ -177,24 +194,32 @@ const App = () => {
             </option>
           ))}
         </select>
+
+        {/* Display current TabPanel state */}
+        <div style={{ marginLeft: '20px', fontSize: '14px', color: '#666' }}>
+          TabPanel status: <strong>{isTabPanelFolded ? 'Collapsed' : 'Expanded'}</strong>
+        </div>
       </div>
 
       <ContestEditor
-				// Editor props
+        // Editor props
         files={files}
         editorTheme={theme}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         submitButtonText="Run Code"
         submittingButtonText="Running..."
-				SubmitIcon={FaPlay}
+        SubmitIcon={FaPlay}
 
-				// Terminal props
+        // Terminal props
         terminalTitle="Interactive Terminal"
         terminalHistory={terminalHistory}
         onCommand={handleTerminalCommand}
         terminalPrompt="$ "
-				terminalReadOnly={false}
+        terminalReadOnly={false}
+
+        // TabPanel props
+        onTabPanelFoldChange={handleTabPanelFoldChange}
       />
 
       <div style={{ marginTop: '20px', fontSize: '14px', color: '#666' }}>
@@ -210,6 +235,7 @@ const App = () => {
           <li>Interactive terminal with command history</li>
           <li>Scrollable terminal output using react-scrollbox</li>
           <li>Vertically stacked editor and terminal using ContestEditor</li>
+          <li>TabPanel folding state notification via callbacks</li>
         </ul>
       </div>
     </div>

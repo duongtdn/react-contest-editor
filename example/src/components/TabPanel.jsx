@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 /**
  * TabPanel component that displays content in tabs on the left side of the editor.
  * Takes full height to match the Editor and Terminal components.
  * Tab bar is always in dark mode for consistency.
+ * Includes fold/unfold functionality to collapse into a vertical icon bar.
  */
 const TabPanel = ({
   tabs = [],
   defaultActiveTab = 0,
   width = '250px',
-  theme = 'github-dark'
+  theme = 'github-dark',
+  onFoldChange = () => {}, // New prop for notifying parent of fold state changes
 }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(defaultActiveTab);
+  const [isFolded, setIsFolded] = useState(false);
   const isDarkTheme = theme.includes('dark');
 
   // Theme-specific colors
@@ -26,6 +30,12 @@ const TabPanel = ({
     activeBorder: '#007acc'
   };
 
+  const toggleFold = () => {
+    const newFoldedState = !isFolded;
+    setIsFolded(newFoldedState);
+    onFoldChange(newFoldedState); // Notify parent about fold state change
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -33,55 +43,140 @@ const TabPanel = ({
       border: '1px solid #666',
       borderRadius: '4px',
       overflow: 'hidden',
-      width: width,
-      backgroundColor: colors.background,
+      width: isFolded ? '48px' : width,
+      backgroundColor: isFolded ? colors.headerBg : colors.background,
       marginRight: '8px',
       alignSelf: 'stretch',
+      transition: 'width 0.3s ease',
     }}>
-      {/* Tabs navigation - always dark */}
-      <div style={{
-        display: 'flex',
-        backgroundColor: colors.headerBg,
-        padding: '0',
-        margin: '0',
-        listStyle: 'none',
-      }}>
-        {tabs.map((tab, index) => (
-          <div
-            key={index}
-            style={{
-              padding: '8px 16px',
-              cursor: 'pointer',
-              color: activeTabIndex === index ? '#fff' : '#ccc',
-              backgroundColor: activeTabIndex === index ? colors.activeTabBg : 'transparent',
-              borderBottom: activeTabIndex === index ? `2px solid ${colors.activeBorder}` : '2px solid transparent',
-              fontFamily: 'consolas, monospace',
-            }}
-            onClick={() => setActiveTabIndex(index)}
-            title={tab.title}
-          >
-            {tab.icon && <span style={{ marginRight: '6px' }}>{tab.icon}</span>}
-            {tab.label}
+      {!isFolded && (
+        <div style={{
+          display: 'flex',
+          backgroundColor: colors.headerBg,
+          padding: '0',
+          margin: '0',
+          listStyle: 'none',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            flex: 1,
+            overflow: 'visible'
+          }}>
+            {tabs.map((tab, index) => (
+              <div
+                key={index}
+                style={{
+                  padding: '8px',
+                  paddingLeft: '16px',
+                  paddingRight: '16px',
+                  cursor: 'pointer',
+                  color: activeTabIndex === index ? '#fff' : '#ccc',
+                  backgroundColor: activeTabIndex === index ? colors.activeTabBg : 'transparent',
+                  borderBottom: activeTabIndex === index ? `4px solid ${colors.activeBorder}` : '4px solid transparent',
+                  fontFamily: 'consolas, monospace',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  whiteSpace: 'nowrap',
+                }}
+                onClick={() => setActiveTabIndex(index)}
+                title={tab.title || tab.label}
+              >
+                {tab.icon && <span style={{ marginRight: '6px' }}>{tab.icon}</span>}
+                {tab.label}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Tab content - adapts to theme */}
-      <div style={{ flex: 1, overflow: 'auto' }}>
-        {tabs.map((tab, index) => (
+          {/* Fold/unfold button */}
           <div
-            key={index}
             style={{
-              display: index === activeTabIndex ? 'block' : 'none',
-              padding: '10px',
-              height: '100%',
-              color: colors.text
+              padding: '8px',
+              cursor: 'pointer',
+              color: '#ccc',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
+            onClick={toggleFold}
+            title="Collapse panel"
           >
-            {tab.content}
+            <FiChevronLeft />
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {isFolded ? (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: colors.headerBg,
+          height: '100%',
+          alignItems: 'center',
+        }}>
+          {/* Unfold button at the top */}
+          <div
+            style={{
+              padding: '12px',
+              cursor: 'pointer',
+              color: '#ccc',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderBottom: '1px solid #555',
+              width: '100%',
+            }}
+            onClick={toggleFold}
+            title="Expand panel"
+          >
+            <FiChevronRight />
+          </div>
+
+          {/* Vertical tabs with icons only */}
+          {tabs.map((tab, index) => (
+            <div
+              key={index}
+              style={{
+                padding: '12px',
+                cursor: 'pointer',
+                color: activeTabIndex === index ? '#fff' : '#ccc',
+                backgroundColor: activeTabIndex === index ? colors.activeTabBg : 'transparent',
+                borderLeft: activeTabIndex === index ? `4px solid ${colors.activeBorder}` : '4px solid transparent',
+                fontFamily: 'consolas, monospace',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+              }}
+              onClick={() => { toggleFold(); setActiveTabIndex(index); }}
+              title={tab.title || tab.label}
+            >
+              {tab.icon ? tab.icon : tab.label.charAt(0)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{
+          flex: 1,
+          overflow: 'auto',
+        }}>
+          {tabs.map((tab, index) => (
+            <div
+              key={index}
+              style={{
+                display: index === activeTabIndex ? 'block' : 'none',
+                padding: '10px',
+                height: '100%',
+                color: colors.text
+              }}
+            >
+              {tab.content}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
