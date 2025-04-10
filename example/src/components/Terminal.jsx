@@ -189,8 +189,9 @@ const createStyles = (theme = 'github-dark') => {
 
   return {
     container: {
-      border: `1px solid #666`,
-			borderTop: 'none',
+      borderLeft: '1px solid #666',
+			borderRight: '1px solid #666',
+			borderBottom: '1px solid #666',
       borderRadius: '0 0 4px 4px',
       overflow: 'hidden',
       fontFamily: 'monospace',
