@@ -67,12 +67,36 @@ const App = () => {
       console.log("Submit complete!", editorContents);
       setIsSubmitting(false);
 
-      // Add completion message to terminal
-      setTerminalHistory(prev => [
-        ...prev,
-        { type: 'output', content: 'Submission successful!' },
-        { type: 'output', content: `Files submitted: ${editorContents.map(file => file.filename).join(', ')}` }
-      ]);
+      // Randomly simulate errors for Python files (30% chance)
+      const pythonFile = editorContents.find(file => file.filename.endsWith('.py'));
+      const simulateError = pythonFile && Math.random() < 0.3;
+
+      if (simulateError) {
+        // Create a simulated Python error stack trace
+        const errorLines = [
+          { type: 'error', content: 'Traceback (most recent call last):' },
+          { type: 'error', content: `  File "${pythonFile.filename}", line 6, in <module>` },
+          { type: 'error', content: '    result = sum_numbers(a, b)' },
+          { type: 'error', content: `  File "${pythonFile.filename}", line 2, in sum_numbers` },
+          { type: 'error', content: '    return a + b' },
+          { type: 'error', content: 'TypeError: can only concatenate str (not "int") to str' },
+        ];
+
+        setTerminalHistory(prev => [
+          ...prev,
+          { type: 'output', content: 'Running main.py with arguments [5, "10"]...' },
+          ...errorLines
+        ]);
+      } else {
+        // Add successful completion message to terminal
+        setTerminalHistory(prev => [
+          ...prev,
+          { type: 'output', content: 'Submission successful!' },
+          { type: 'output', content: `Files submitted: ${editorContents.map(file => file.filename).join(', ')}` },
+          { type: 'output', content: 'Running main.py with arguments [5, 10]...' },
+          { type: 'output', content: '15' }
+        ]);
+      }
     }, 2000);
   };
 

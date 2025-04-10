@@ -144,7 +144,10 @@ const Terminal = ({
         >
           <div style={styles.scrollBoxContent}>
             {lines.map((line, index) => (
-              <div key={index} style={styles.line}>
+              <div key={index} style={{
+                ...styles.line,
+                ...(line.type === 'error' ? styles.errorLine : {})
+              }}>
                 {line.content}
               </div>
             ))}
@@ -185,6 +188,7 @@ const createStyles = (theme = 'github-dark') => {
     buttonHoverBorder: isDarkTheme ? '#888' : '#bbb',
     scrollbarThumb: isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
     scrollbarThumbHover: isDarkTheme ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+    errorText: isDarkTheme ? '#ff4d4d' : '#d32f2f',
   };
 
   return {
@@ -222,7 +226,8 @@ const createStyles = (theme = 'github-dark') => {
     },
     button: {
       backgroundColor: 'transparent',
-      border: `1px solid ${colors.buttonBorder}`,
+      border: `1px solid`,
+			borderColor: colors.buttonBorder,
       borderRadius: '3px',
       color: colors.text,
       padding: '4px',
@@ -270,6 +275,9 @@ const createStyles = (theme = 'github-dark') => {
       lineHeight: '1.4',
       whiteSpace: 'pre-wrap',
       wordBreak: 'break-all',
+    },
+    errorLine: {
+      color: colors.errorText,
     },
     promptLine: {
       display: 'flex',
