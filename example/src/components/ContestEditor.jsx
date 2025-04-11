@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { FaPaperPlane, FaList, FaFileAlt, FaInfo } from 'react-icons/fa';
+import { FaPaperPlane, FaInfo } from 'react-icons/fa';
+import { GrTest } from "react-icons/gr";
+
 import Editor from './Editor';
 import Terminal from './Terminal';
 import TabPanel from './TabPanel';
@@ -35,10 +37,10 @@ const ContestEditor = ({
       content: <div>Contest information goes here</div>
     },
     {
-      label: 'Tasks',
-      icon: <FaList />,
+      label: 'Test Cases',
+      icon: <GrTest />,
       title: 'Task List',
-      content: <div>Task list goes here</div>
+      content: <div>Test Cases goes here</div>
     }
   ],
 
