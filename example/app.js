@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FaPlay } from 'react-icons/fa';
 
@@ -46,6 +46,8 @@ const App = () => {
   ]);
   // Add state to track TabPanel fold status
   const [isTabPanelFolded, setIsTabPanelFolded] = useState(false);
+  // Add ref to control the ContestEditor
+  const contestEditorRef = useRef(null);
 
   const handleThemeChange = (e) => {
     setTheme(e.target.value);
@@ -64,6 +66,11 @@ const App = () => {
         content: `TabPanel was ${foldedState ? 'collapsed' : 'expanded'} at ${new Date().toLocaleTimeString()}`
       }
     ]);
+  };
+
+  // Handler for tab changes
+  const handleTabChange = (index, tab) => {
+    console.log(`Tab changed to "${tab.label}" (index: ${index})`);
   };
 
   const handleSubmit = (editorContents) => {
@@ -113,6 +120,13 @@ const App = () => {
           { type: 'output', content: 'Running main.py with arguments [5, 10]...' },
           { type: 'output', content: '15' }
         ]);
+
+        // Switch to Test Cases tab after successful submission
+        const testCasesTabIndex = contestEditorRef.current.findTabIndexByLabel('Test Cases');
+        if (testCasesTabIndex !== -1) {
+          contestEditorRef.current.switchTab(testCasesTabIndex);
+          console.log('Switched to Test Cases tab after successful submission');
+        }
       }
     }, 2000);
   };
@@ -127,7 +141,9 @@ const App = () => {
             '  help    - Display this help message',
             '  run     - Simulate running the code',
             '  clear   - Clear the terminal',
-            '  about   - Show information about the editor'
+            '  about   - Show information about the editor',
+            '  tab:info - Switch to Info tab',
+            '  tab:test - Switch to Test Cases tab'
           ]);
           break;
         case 'run':
@@ -147,6 +163,32 @@ const App = () => {
             'Version: 1.0.0',
             'Built with React and @duongtdn/react-scrollbox'
           ]);
+          break;
+        case 'tab:info':
+          if (contestEditorRef.current) {
+            const infoTabIndex = contestEditorRef.current.findTabIndexByLabel('Info');
+            if (infoTabIndex !== -1) {
+              contestEditorRef.current.switchTab(infoTabIndex);
+              callback(['Switched to Info tab']);
+            } else {
+              callback(['Info tab not found']);
+            }
+          } else {
+            callback(['Editor not ready']);
+          }
+          break;
+        case 'tab:test':
+          if (contestEditorRef.current) {
+            const testCasesTabIndex = contestEditorRef.current.findTabIndexByLabel('Test Cases');
+            if (testCasesTabIndex !== -1) {
+              contestEditorRef.current.switchTab(testCasesTabIndex);
+              callback(['Switched to Test Cases tab']);
+            } else {
+              callback(['Test Cases tab not found']);
+            }
+          } else {
+            callback(['Editor not ready']);
+          }
           break;
         default:
           callback([`Command not found: ${command}`]);
@@ -202,6 +244,7 @@ const App = () => {
       </div>
 
       <ContestEditor
+        ref={contestEditorRef}
         // Editor props
         files={files}
         editorTheme={theme}
@@ -219,6 +262,8 @@ const App = () => {
         terminalReadOnly={false}
 
         // TabPanel props
+        initialActiveTab={0}
+        onTabChange={handleTabChange}
         onTabPanelFoldChange={handleTabPanelFoldChange}
       />
 
@@ -236,6 +281,8 @@ const App = () => {
           <li>Scrollable terminal output using react-scrollbox</li>
           <li>Vertically stacked editor and terminal using ContestEditor</li>
           <li>TabPanel folding state notification via callbacks</li>
+          <li>Programmatically switch TabPanel tabs (try running 'tab:info' or 'tab:test' in the terminal)</li>
+          <li>Auto-switch to Test Cases tab after successful code submission</li>
         </ul>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { FaPaperPlane, FaInfo } from 'react-icons/fa';
 import { GrTest } from "react-icons/gr";
 
@@ -10,7 +10,7 @@ import TabPanel from './TabPanel';
  * ContestEditor component that combines TabPanel, Editor and Terminal components
  * with TabPanel on the left and Editor/Terminal in a vertical layout on the right.
  */
-const ContestEditor = ({
+const ContestEditor = forwardRef(({
   // Editor props
   files,
   editorTheme = 'github-dark',
@@ -43,19 +43,41 @@ const ContestEditor = ({
       content: <div>Test Cases goes here</div>
     }
   ],
+  initialActiveTab = 0,
+  onTabChange = null,
 
   // Panel state callbacks
   onTabPanelFoldChange = null
-}) => {
+}, ref) => {
   // Keep theme synchronized between editor and terminal
   const theme = editorTheme;
 
   // Track TabPanel folded state
   const [isTabPanelFolded, setIsTabPanelFolded] = useState(false);
 
+  // Track active tab
+  const [activeTabIndex, setActiveTabIndex] = useState(initialActiveTab);
+
   // Refs for components
   const editorCtrl = useRef();
   const rightPanelRef = useRef();
+  const tabPanelRef = useRef();
+
+  // Expose methods to parent components via ref
+  useImperativeHandle(ref, () => ({
+    // Method to switch tab programmatically
+    switchTab: (tabIndex) => {
+      if (tabIndex >= 0 && tabIndex < leftTabs.length) {
+        setActiveTabIndex(tabIndex);
+      }
+    },
+    // Method to get current active tab index
+    getActiveTabIndex: () => activeTabIndex,
+    // Method to find tab index by label
+    findTabIndexByLabel: (label) => {
+      return leftTabs.findIndex(tab => tab.label === label);
+    }
+  }));
 
   // Handle fold state changes
   const handleTabPanelFoldChange = (foldedState) => {
@@ -63,6 +85,15 @@ const ContestEditor = ({
     // Call external handler if provided
     if (onTabPanelFoldChange) {
       onTabPanelFoldChange(foldedState);
+    }
+  };
+
+  // Handle tab changes
+  const handleTabChange = (index) => {
+    setActiveTabIndex(index);
+    // Call external handler if provided
+    if (onTabChange) {
+      onTabChange(index, leftTabs[index]);
     }
   };
 
@@ -88,8 +119,11 @@ const ContestEditor = ({
     <div style={styles.container}>
       {/* TabPanel Component on the left */}
       <TabPanel
+        ref={tabPanelRef}
         tabs={leftTabs}
-        defaultActiveTab={0}
+        defaultActiveTab={initialActiveTab}
+        activeTabIndex={activeTabIndex}
+        onTabChange={handleTabChange}
         width={tabPanelWidth}
         theme={theme}
         onFoldChange={handleTabPanelFoldChange}
@@ -121,7 +155,7 @@ const ContestEditor = ({
       </div>
     </div>
   );
-};
+});
 
 export default ContestEditor;
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 /**
@@ -6,17 +6,30 @@ import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
  * Takes full height to match the Editor and Terminal components.
  * Tab bar is always in dark mode for consistency.
  * Includes fold/unfold functionality to collapse into a vertical icon bar.
+ * Can be controlled externally by providing activeTabIndex prop.
  */
 const TabPanel = ({
   tabs = [],
   defaultActiveTab = 0,
+  activeTabIndex: externalActiveTabIndex = null,
+  onTabChange = () => {},
   width = '250px',
   theme = 'github-dark',
-  onFoldChange = () => {}, // New prop for notifying parent of fold state changes
+  onFoldChange = () => {},
 }) => {
-  const [activeTabIndex, setActiveTabIndex] = useState(defaultActiveTab);
+  const [internalActiveTabIndex, setInternalActiveTabIndex] = useState(defaultActiveTab);
   const [isFolded, setIsFolded] = useState(false);
   const isDarkTheme = theme.includes('dark');
+
+  // Use external tab index if provided, otherwise use internal state
+  const activeTabIndex = externalActiveTabIndex !== null ? externalActiveTabIndex : internalActiveTabIndex;
+
+  // Update internal state when external prop changes
+  useEffect(() => {
+    if (externalActiveTabIndex !== null) {
+      setInternalActiveTabIndex(externalActiveTabIndex);
+    }
+  }, [externalActiveTabIndex]);
 
   // Theme-specific colors
   const colors = {
@@ -33,7 +46,12 @@ const TabPanel = ({
   const toggleFold = () => {
     const newFoldedState = !isFolded;
     setIsFolded(newFoldedState);
-    onFoldChange(newFoldedState); // Notify parent about fold state change
+    onFoldChange(newFoldedState);
+  };
+
+  const handleTabClick = (index) => {
+    setInternalActiveTabIndex(index);
+    onTabChange(index);
   };
 
   return (
@@ -81,7 +99,7 @@ const TabPanel = ({
                   justifyContent: 'flex-start',
                   whiteSpace: 'nowrap',
                 }}
-                onClick={() => setActiveTabIndex(index)}
+                onClick={() => handleTabClick(index)}
                 title={tab.title || tab.label}
               >
                 {tab.icon && <span style={{ marginRight: '6px' }}>{tab.icon}</span>}
@@ -150,7 +168,7 @@ const TabPanel = ({
                 justifyContent: 'center',
                 width: '100%',
               }}
-              onClick={() => { toggleFold(); setActiveTabIndex(index); }}
+              onClick={() => { toggleFold(); handleTabClick(index); }}
               title={tab.title || tab.label}
             >
               {tab.icon ? tab.icon : tab.label.charAt(0)}
