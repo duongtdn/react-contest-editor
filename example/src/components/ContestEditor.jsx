@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { FaPaperPlane, FaInfo } from 'react-icons/fa';
 import { GrTest } from "react-icons/gr";
 
@@ -53,6 +53,10 @@ const ContestEditor = ({
   // Track TabPanel folded state
   const [isTabPanelFolded, setIsTabPanelFolded] = useState(false);
 
+  // Refs for components
+  const editorCtrl = useRef();
+  const rightPanelRef = useRef();
+
   // Handle fold state changes
   const handleTabPanelFoldChange = (foldedState) => {
     setIsTabPanelFolded(foldedState);
@@ -61,6 +65,24 @@ const ContestEditor = ({
       onTabPanelFoldChange(foldedState);
     }
   };
+
+  // Setup ResizeObserver to refresh editor when the container is resized
+  useEffect(() => {
+    if (!rightPanelRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (editorCtrl.current && editorCtrl.current.refresh) {
+        editorCtrl.current.refresh();
+      }
+    });
+
+    resizeObserver.observe(rightPanelRef.current);
+
+    // Cleanup observer on component unmount
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   return (
     <div style={styles.container}>
@@ -74,7 +96,7 @@ const ContestEditor = ({
       />
 
       {/* Editor and Terminal Stack on the right */}
-      <div style={styles.rightPanel}>
+      <div ref={rightPanelRef} style={styles.rightPanel}>
         {/* Editor Component */}
         <Editor
           files={files}
@@ -84,6 +106,7 @@ const ContestEditor = ({
           submitButtonText={submitButtonText}
           submittingButtonText={submittingButtonText}
           SubmitIcon={SubmitIcon}
+          onReady={(ctrl) => editorCtrl.current = ctrl}
         />
 
         {/* Terminal Component */}

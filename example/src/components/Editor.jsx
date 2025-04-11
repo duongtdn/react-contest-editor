@@ -13,7 +13,8 @@ const Editor = ({
   isSubmitting = false,
   submitButtonText = 'Submit',
   submittingButtonText = 'Submitting...',
-  SubmitIcon = FaPaperPlane
+  SubmitIcon = FaPaperPlane,
+	onReady = () => {},
 }) => {
   const [selectedFileIndex, setSelectedFileIndex] = useState(0);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
@@ -56,6 +57,12 @@ const Editor = ({
     });
   };
 
+	const refresh = () => {
+    Object.keys(editorsRef.current).forEach((ed, index) => {
+      editorsRef.current[index].editor.layout()
+    })
+	}
+
   const createEditors = () => {
     if (!containerRef.current || editorsInitialized) return;
 
@@ -96,6 +103,9 @@ const Editor = ({
     ExtendableCodeEditor.changeTheme(theme);
     currentThemeRef.current = theme;
     setEditorsInitialized(true);
+
+		onReady && onReady({ refresh });
+
   };
 
   useEffect(() => {
