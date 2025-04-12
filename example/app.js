@@ -359,7 +359,7 @@ const App = () => {
         SubmitIcon={FaPlay}
 
         // Terminal props
-        terminalTitle="Interactive Terminal"
+        terminalTitle="Terminal"
         initialTerminalHistory={[
           { type: 'output', content: 'Welcome to the Terminal! Type a command and press Enter.' },
           { type: 'output', content: 'Try using commands like "help", "run", or "clear".' }

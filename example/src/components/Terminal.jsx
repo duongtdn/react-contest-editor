@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import ScrollBox from '@duongtdn/react-scrollbox';
-import { FaCopy, FaTrash, FaCheck } from 'react-icons/fa';
+import { FaCopy, FaTrash, FaCheck, FaTerminal } from 'react-icons/fa';
 
 const Terminal = ({
   title = 'Terminal',
@@ -103,7 +103,7 @@ const Terminal = ({
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h3 style={styles.title}>{title}</h3>
+        <h3 style={styles.title}><FaTerminal style={styles.icon} /> {title}</h3>
         <div style={styles.buttons}>
           <div style={styles.tooltipContainer}>
             <button
@@ -219,6 +219,11 @@ const createStyles = (theme = 'github-dark') => {
       fontSize: '14px',
       fontWeight: 'bold',
       color: colors.text,
+      display: 'flex',
+      alignItems: 'center',
+    },
+    icon: {
+      marginRight: '8px',
     },
     buttons: {
       display: 'flex',
