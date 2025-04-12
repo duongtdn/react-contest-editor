@@ -40,10 +40,6 @@ const files = [
 const App = () => {
   const [theme, setTheme] = useState('github-dark');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [terminalHistory, setTerminalHistory] = useState([
-    { type: 'output', content: 'Welcome to the Terminal! Type a command and press Enter.' },
-    { type: 'output', content: 'Try using commands like "help", "run", or "clear".' }
-  ]);
   // Add state to track TabPanel fold status
   const [isTabPanelFolded, setIsTabPanelFolded] = useState(false);
   // Add ref to control the ContestEditor
@@ -58,14 +54,13 @@ const App = () => {
     setIsTabPanelFolded(foldedState);
     console.log(`TabPanel is now ${foldedState ? 'folded' : 'unfolded'}`);
 
-    // Add a message to the terminal to demonstrate the notification
-    setTerminalHistory(prev => [
-      ...prev,
-      {
+    // Add a message to the terminal using ContestEditor ref
+    if (contestEditorRef.current) {
+      contestEditorRef.current.addTerminalEntry({
         type: 'system',
         content: `TabPanel was ${foldedState ? 'collapsed' : 'expanded'} at ${new Date().toLocaleTimeString()}`
-      }
-    ]);
+      });
+    }
   };
 
   // Handler for tab changes
@@ -73,62 +68,169 @@ const App = () => {
     console.log(`Tab changed to "${tab.label}" (index: ${index})`);
   };
 
+  // Returns a Promise for the submission process
   const handleSubmit = (editorContents) => {
     // Set submitting state to true to disable the button
     setIsSubmitting(true);
-
     console.log("Submitting...", editorContents);
 
-    // Add submission to terminal
-    const newTerminalEntry = {
-      type: 'output',
-      content: `Submitting code at ${new Date().toLocaleTimeString()}...`
-    };
-    setTerminalHistory(prev => [...prev, newTerminalEntry]);
-
-    // Simulate an API request with a 2-second timeout
-    setTimeout(() => {
-      console.log("Submit complete!", editorContents);
-      setIsSubmitting(false);
-
-      // Randomly simulate errors for Python files (30% chance)
-      const pythonFile = editorContents.find(file => file.filename.endsWith('.py'));
-      const simulateError = pythonFile && Math.random() < 0.3;
-
-      if (simulateError) {
-        // Create a simulated Python error stack trace
-        const errorLines = [
-          { type: 'error', content: 'Traceback (most recent call last):' },
-          { type: 'error', content: `  File "${pythonFile.filename}", line 6, in <module>` },
-          { type: 'error', content: '    result = sum_numbers(a, b)' },
-          { type: 'error', content: `  File "${pythonFile.filename}", line 2, in sum_numbers` },
-          { type: 'error', content: '    return a + b' },
-          { type: 'error', content: 'TypeError: can only concatenate str (not "int") to str' },
-        ];
-
-        setTerminalHistory(prev => [
-          ...prev,
-          { type: 'output', content: 'Running main.py with arguments [5, "10"]...' },
-          ...errorLines
-        ]);
-      } else {
-        // Add successful completion message to terminal
-        setTerminalHistory(prev => [
-          ...prev,
-          { type: 'output', content: 'Submission successful!' },
-          { type: 'output', content: `Files submitted: ${editorContents.map(file => file.filename).join(', ')}` },
-          { type: 'output', content: 'Running main.py with arguments [5, 10]...' },
-          { type: 'output', content: '15' }
-        ]);
-
-        // Switch to Test Cases tab after successful submission
-        const testCasesTabIndex = contestEditorRef.current.findTabIndexByLabel('Test Cases');
-        if (testCasesTabIndex !== -1) {
-          contestEditorRef.current.switchTab(testCasesTabIndex);
-          console.log('Switched to Test Cases tab after successful submission');
+    // Return a promise that resolves or rejects based on the sandbox server response
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Extract the main code to send to the sandbox server
+        const mainFile = editorContents.find(file => file.filename === "main.py");
+        if (!mainFile) {
+          reject(new Error("No main.py file found for submission"));
+          return;
         }
+
+        // Simulate sending the code to a sandbox server
+        // In a real implementation, this would be a fetch call to your sandbox API
+        const response = await simulateSandboxRequest(mainFile.content);
+
+        if (response.ok) {
+          // Just resolve with the result data
+          resolve(response.json);
+        } else {
+          // Just reject with the error
+          reject(new Error(`Server error: ${response.status} ${response.statusText}`));
+        }
+      } catch (err) {
+        // Handle any network or processing errors
+        reject(err);
+      } finally {
+        setIsSubmitting(false);
       }
-    }, 2000);
+    });
+  };
+
+  // This function simulates a request to a sandbox server
+  // In a real implementation, this would be replaced with an actual fetch call
+  const simulateSandboxRequest = (code) => {
+    return new Promise((resolve) => {
+      // Simulate network delay
+      setTimeout(() => {
+        // Random selection of response types for demonstration
+        const responseType = Math.random();
+        let mockResponse;
+
+        if (responseType < 0.4) {
+          // All tests pass
+          mockResponse = {
+            ok: true,
+            json: {
+              compile: { isPass: true },
+              evaluate: {
+                isPass: true,
+                testcases: [
+                  {
+                    title: "Basic Test",
+                    description: "Test with positive numbers",
+                    isPass: true,
+                    executionTime: "12189513",
+                    stdout: "8",
+                    stdin: "",
+                    expectedStdout: "8"
+                  },
+                  {
+                    title: "Mixed Numbers",
+                    description: "Test with mixed positive and negative numbers",
+                    isPass: true,
+                    executionTime: "10406817",
+                    stdout: "3",
+                    stdin: "",
+                    expectedStdout: "3"
+                  },
+                  {
+                    title: "Edge Case",
+                    description: "Test with duplicate numbers",
+                    isPass: true,
+                    hidden: true
+                  }
+                ]
+              }
+            }
+          };
+        } else if (responseType < 0.8) {
+          // Some tests fail
+          mockResponse = {
+            ok: true,
+            json: {
+              compile: { isPass: true },
+              evaluate: {
+                isPass: false,
+                testcases: [
+                  {
+                    title: "Basic Test",
+                    description: "Test basic addition with positive numbers",
+                    isPass: true,
+                    executionTime: "10518563",
+                    stdout: "30",
+                    stdin: "10 20",
+                    expectedStdout: "30"
+                  },
+                  {
+                    title: "Negative Numbers",
+                    description: "Test with negative numbers",
+                    isPass: false,
+                    executionTime: "9533989",
+                    stdout: "30",
+                    stdin: "-5 8",
+                    expectedStdout: "3"
+                  },
+                  {
+                    title: "Large Numbers",
+                    description: "Test with large numbers",
+                    isPass: false,
+                    hidden: true
+                  }
+                ]
+              }
+            }
+          };
+        } else {
+          // Runtime error
+          mockResponse = {
+            ok: true,
+            json: {
+              compile: { isPass: true },
+              evaluate: {
+                isPass: false,
+                testcases: [
+                  {
+                    title: "Basic Test",
+                    description: "Test with positive numbers",
+                    isPass: false,
+                    executionTime: "11180634",
+                    stderr: "Program exited with error code: 1",
+                    stdin: "",
+                    expectedStdout: "8"
+                  },
+                  {
+                    title: "Mixed Numbers",
+                    description: "Test with mixed positive and negative numbers",
+                    isPass: false,
+                    executionTime: "10061135",
+                    stderr: "Program exited with error code: 1",
+                    stdin: "",
+                    expectedStdout: "3"
+                  },
+                  {
+                    title: "Edge Case",
+                    description: "Test with duplicate numbers",
+                    isPass: false,
+                    hidden: true
+                  }
+                ]
+              },
+              error: "  File \"../main.py\", line 7\n    max_num = \n             ^\nSyntaxError: invalid syntax\n\n  File \"../main.py\", line 7\n    max_num = \n             ^\nSyntaxError: invalid syntax\n\n  File \"../main.py\", line 7\n    max_num = \n             ^\nSyntaxError: invalid syntax\n\n"
+            }
+          };
+        }
+
+        resolve(mockResponse);
+      }, 1500);
+    });
   };
 
   const handleTerminalCommand = (command, callback) => {
@@ -154,7 +256,9 @@ const App = () => {
           ]);
           break;
         case 'clear':
-          setTerminalHistory([]);
+          if (contestEditorRef.current) {
+            contestEditorRef.current.clearTerminal();
+          }
           callback(null);
           break;
         case 'about':
@@ -256,7 +360,10 @@ const App = () => {
 
         // Terminal props
         terminalTitle="Interactive Terminal"
-        terminalHistory={terminalHistory}
+        initialTerminalHistory={[
+          { type: 'output', content: 'Welcome to the Terminal! Type a command and press Enter.' },
+          { type: 'output', content: 'Try using commands like "help", "run", or "clear".' }
+        ]}
         onCommand={handleTerminalCommand}
         terminalPrompt="$ "
         terminalReadOnly={false}
@@ -283,6 +390,8 @@ const App = () => {
           <li>TabPanel folding state notification via callbacks</li>
           <li>Programmatically switch TabPanel tabs (try running 'tab:info' or 'tab:test' in the terminal)</li>
           <li>Auto-switch to Test Cases tab after successful code submission</li>
+          <li>Internal terminal management in ContestEditor component</li>
+          <li>Promise-based submission handling with result/error feedback</li>
         </ul>
       </div>
     </div>
