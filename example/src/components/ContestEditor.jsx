@@ -52,6 +52,11 @@ const ContestEditor = forwardRef(({
 
   // Container ref for height measurement
   const containerRef = useRef(null);
+  
+  // Calculate editor and terminal heights for 2:1 ratio
+  const numericHeight = parseInt(height, 10) || 600;
+  const editorHeight = Math.floor(numericHeight * (2/3));
+  const terminalHeight = numericHeight - editorHeight;
 
   // Default tabs configuration using InfoPanel for Info tab
   const defaultTabs = [
@@ -292,7 +297,7 @@ const ContestEditor = forwardRef(({
 
       {/* Editor and Terminal Stack on the right */}
       <div ref={rightPanelRef} style={styles.rightPanel}>
-        {/* Editor Component */}
+        {/* Editor Component - 2/3 of height */}
         <Editor
           files={files}
           theme={theme}
@@ -302,9 +307,10 @@ const ContestEditor = forwardRef(({
           submittingButtonText={submittingButtonText}
           SubmitIcon={SubmitIcon}
           onReady={(ctrl) => editorCtrl.current = ctrl}
+          height={editorHeight}
         />
 
-        {/* Terminal Component */}
+        {/* Terminal Component - 1/3 of height */}
         <Terminal
           title={terminalTitle}
           history={terminalHistory}
@@ -312,6 +318,7 @@ const ContestEditor = forwardRef(({
           prompt={terminalPrompt}
           readOnly={terminalReadOnly}
           theme={theme}
+          height={terminalHeight}
         />
       </div>
     </div>
@@ -332,6 +339,14 @@ const styles = {
   rightPanel: {
     display: 'flex',
     flexDirection: 'column',
+    flex: 1,
+    overflow: 'hidden',
+  },
+  editorContainer: {
+    flex: 2,
+    overflow: 'hidden',
+  },
+  terminalContainer: {
     flex: 1,
     overflow: 'hidden',
   }
