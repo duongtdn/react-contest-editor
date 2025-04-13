@@ -392,7 +392,7 @@ const App = () => {
         onTabChange={handleTabChange}
         onTabPanelFoldChange={handleTabPanelFoldChange}
 
-				height="500px"
+				height="560px"
       />
 
       <div style={{ marginTop: '20px', fontSize: '14px', color: '#666' }}>

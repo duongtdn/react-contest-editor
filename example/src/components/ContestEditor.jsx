@@ -39,6 +39,7 @@ const ContestEditor = forwardRef(({
 
   // Panel state callbacks
   onTabPanelFoldChange = null,
+  onTerminalFoldChange = null,
 
 	height = '600px',
 }, ref) => {
@@ -47,16 +48,17 @@ const ContestEditor = forwardRef(({
   const theme = editorTheme;
 
   const [isTabPanelFolded, setIsTabPanelFolded] = useState(false);
+  const [isTerminalFolded, setIsTerminalFolded] = useState(false);
 
   const [activeTabIndex, setActiveTabIndex] = useState(initialActiveTab);
 
   // Container ref for height measurement
   const containerRef = useRef(null);
-  
-  // Calculate editor and terminal heights for 2:1 ratio
+
+  // Calculate editor and terminal heights based on folding state
   const numericHeight = parseInt(height, 10) || 600;
-  const editorHeight = Math.floor(numericHeight * (2/3));
-  const terminalHeight = numericHeight - editorHeight;
+  const terminalHeight = isTerminalFolded ? 40 : Math.floor(numericHeight / 3); // Just header height when folded, or 1/3 of total height
+  const editorHeight = numericHeight - terminalHeight;
 
   // Default tabs configuration using InfoPanel for Info tab
   const defaultTabs = [
@@ -129,11 +131,19 @@ const ContestEditor = forwardRef(({
       const result = await onSubmit(editorContents);
 
       if (result.error) {
+        // Make sure terminal is unfolded when there's an error
+        if (isTerminalFolded) {
+          setIsTerminalFolded(false);
+        }
         addTerminalEntry({ type: 'error', content: result.error });
         return result;
       }
 
       if (!result.compile?.isPass) {
+        // Make sure terminal is unfolded for compilation errors
+        if (isTerminalFolded) {
+          setIsTerminalFolded(false);
+        }
         addTerminalEntry({ type: 'error', content: 'Compilation error:' });
         if (result?.error) {
           addTerminalEntry({ type: 'error', content: result.error });
@@ -243,7 +253,11 @@ const ContestEditor = forwardRef(({
     // Method to add multiple terminal entries
     addTerminalEntries,
     // Method to clear terminal
-    clearTerminal: () => setTerminalHistory([])
+    clearTerminal: () => setTerminalHistory([]),
+    // Method to toggle terminal fold state
+    toggleTerminalFold: () => setIsTerminalFolded(prev => !prev),
+    // Get terminal fold state
+    isTerminalFolded: () => isTerminalFolded
   }));
 
   // Handle fold state changes
@@ -255,6 +269,21 @@ const ContestEditor = forwardRef(({
     }
   };
 
+  // Handle terminal fold state changes
+  const handleTerminalFoldChange = (foldedState) => {
+    setIsTerminalFolded(foldedState);
+
+    // Refresh editor after state changes to ensure proper layout
+    if (editorCtrl.current && editorCtrl.current.refresh) {
+      setTimeout(() => {
+        editorCtrl.current.refresh();
+      }, 10);
+    }
+
+    if (onTerminalFoldChange) {
+      onTerminalFoldChange(foldedState);
+    }
+  };
 
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
@@ -297,7 +326,7 @@ const ContestEditor = forwardRef(({
 
       {/* Editor and Terminal Stack on the right */}
       <div ref={rightPanelRef} style={styles.rightPanel}>
-        {/* Editor Component - 2/3 of height */}
+        {/* Editor Component - dynamically sized based on terminal folding */}
         <Editor
           files={files}
           theme={theme}
@@ -310,7 +339,7 @@ const ContestEditor = forwardRef(({
           height={editorHeight}
         />
 
-        {/* Terminal Component - 1/3 of height */}
+        {/* Terminal Component - with dynamic height based on folding state */}
         <Terminal
           title={terminalTitle}
           history={terminalHistory}
@@ -319,6 +348,8 @@ const ContestEditor = forwardRef(({
           readOnly={terminalReadOnly}
           theme={theme}
           height={terminalHeight}
+          onFoldChange={handleTerminalFoldChange}
+          isFolded={isTerminalFolded}
         />
       </div>
     </div>
