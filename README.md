@@ -209,7 +209,7 @@ The `onSubmit` callback should return a Promise that resolves to an object with 
 
 ```javascript
 {
-  type: 'output', // 'output', 'error', 'system', 'command'
+  type: 'output', // 'output', 'error', 'input'
   content: 'Output text'
 }
 ```
