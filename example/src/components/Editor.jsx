@@ -14,18 +14,29 @@ const Editor = ({
   submitButtonText = 'Submit',
   submittingButtonText = 'Submitting...',
   SubmitIcon = FaPaperPlane,
-	onReady = () => {},
+  onReady = () => {},
+  height = 250,
 }) => {
   const [selectedFileIndex, setSelectedFileIndex] = useState(0);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const containerRef = useRef(null);
+  const tabsRef = useRef(null);
   const currentThemeRef = useRef(theme);
   const [editorsInitialized, setEditorsInitialized] = useState(false);
+  const [editorContainerHeight, setEditorContainerHeight] = useState(null);
 
   const editorsRef = useRef([]);
   const editorContainersRef = useRef([]);
   const readOnlyLinesRef = useRef([]);
   const autoResizeRef = useRef([]);
+
+  // Calculate editor container height by subtracting tabs height from total height
+  useEffect(() => {
+    if (height && tabsRef.current) {
+      const tabsHeight = tabsRef.current.offsetHeight;
+      setEditorContainerHeight(`${height - tabsHeight}px`);
+    }
+  }, [height]);
 
   const applyEditorFeatures = (file, index) => {
     const editor = editorsRef.current[index];
@@ -179,7 +190,7 @@ const Editor = ({
 
   return (
     <div style={styles.container}>
-      <div style={styles.tabs}>
+      <div ref={tabsRef} style={styles.tabs}>
         <div style={styles.tabsLeft}>
           {files.map((file, index) => (
             <div
@@ -217,7 +228,10 @@ const Editor = ({
       </div>
       <div
         ref={containerRef}
-        style={styles.editorContainer}
+        style={{
+          ...styles.editorContainer,
+          height: editorContainerHeight
+        }}
       />
     </div>
   );
@@ -271,7 +285,6 @@ const styles = {
   },
   editorContainer: {
     width: '100%',
-    minHeight: '250px',
     position: 'relative',
   },
   editorInstance: {

@@ -8,7 +8,8 @@ const Terminal = ({
   onCommand = null,
   prompt = '$ ',
   readOnly = false,
-  theme = 'github-dark'
+  theme = 'github-dark',
+  height = 300
 }) => {
   const [lines, setLines] = useState(history);
   const [currentInput, setCurrentInput] = useState('');
@@ -20,7 +21,7 @@ const Terminal = ({
   const inputRef = useRef(null);
   const scrollHandlerRef = useRef(null);
 
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const styles = useMemo(() => createStyles(theme, height), [theme, height]);
 
   useEffect(() => {
     setLines(history);
@@ -172,7 +173,7 @@ const Terminal = ({
 
 export default Terminal;
 
-const createStyles = (theme = 'github-dark') => {
+const createStyles = (theme = 'github-dark', height = 300) => {
   const isDarkTheme = theme.includes('dark');
 
   // Theme-specific colors
@@ -200,7 +201,7 @@ const createStyles = (theme = 'github-dark') => {
       backgroundColor: colors.background,
       color: colors.text,
       width: '100%',
-      height: '300px',
+      height: `${height}px`,
       display: 'flex',
       flexDirection: 'column',
     },
