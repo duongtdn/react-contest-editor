@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, act } from 'react';
 import { ExtendableCodeEditor } from 'monaco-ext';
-import { ReadOnlyLines, AutoResizeHeight } from 'monaco-ext/dist/features';
+import { ReadOnlyLines, HighLight } from 'monaco-ext/dist/features';
 import { FaPaperPlane } from 'react-icons/fa';
 
 import themes from 'monaco-ext/dist/themes';
@@ -28,7 +28,7 @@ const Editor = ({
   const editorsRef = useRef([]);
   const editorContainersRef = useRef([]);
   const readOnlyLinesRef = useRef([]);
-  const autoResizeRef = useRef([]);
+  const highlightFeaturesRef = useRef([]);
 
   // Calculate editor container height by subtracting tabs height from total height
   useEffect(() => {
@@ -43,16 +43,11 @@ const Editor = ({
     if (!editor) return;
 
     if (!readOnlyLinesRef.current[index]) readOnlyLinesRef.current[index] = null;
-    if (!autoResizeRef.current[index]) autoResizeRef.current[index] = null;
+    if (!highlightFeaturesRef.current[index]) highlightFeaturesRef.current[index] = null;
 
     if (readOnlyLinesRef.current[index]) {
       editor.features.remove('readOnlyLines');
       readOnlyLinesRef.current[index] = null;
-    }
-
-    if (autoResizeRef.current[index]) {
-      editor.features.remove('autoResize');
-      autoResizeRef.current[index] = null;
     }
 
     if (file.lock) {
@@ -61,18 +56,33 @@ const Editor = ({
       readOnlyLinesRef.current[index] = editor.features.add('readOnlyLines', new ReadOnlyLines(file.readOnly));
     }
 
-    autoResizeRef.current[index] = editor.features.add('autoResize', new AutoResizeHeight());
+    highlightFeaturesRef.current[index] = editor.features.add('highlight', new HighLight());
 
-    editor.eventChannel.addListener('editor.height', (height) => {
-      console.log(`Editor ${index} height changed to ${height}px`);
-    });
   };
 
-	const refresh = () => {
+  const refresh = () => {
     Object.keys(editorsRef.current).forEach((ed, index) => {
       editorsRef.current[index].editor.layout()
     })
-	}
+  }
+
+  const highlight = (filename, lines) => {
+    if (editorsRef.current?.length == 0) return;
+
+    // Find the index of the file by filename
+    const fileIndex = files.findIndex(file => file.filename === filename);
+
+    if (fileIndex === -1) {
+      console.warn(`File "${filename}" not found for highlighting`);
+      return;
+    }
+
+    // Apply the highlight to the editor
+    if (editorsRef.current[fileIndex] && highlightFeaturesRef.current[fileIndex]) {
+      editorsRef.current[fileIndex].eventChannel.emit('editor.highlight', lines);
+			handleFileSelect(fileIndex);
+    }
+  }
 
   const createEditors = () => {
     if (!containerRef.current || editorsInitialized) return;
@@ -115,7 +125,7 @@ const Editor = ({
     currentThemeRef.current = theme;
     setEditorsInitialized(true);
 
-		onReady && onReady({ refresh });
+    onReady && onReady({ refresh, highlight });
 
   };
 
@@ -272,7 +282,7 @@ const styles = {
     alignItems: 'center',
     gap: '6px',
     borderBottom: '4px solid transparent',
-		fontFamily: 'consolas, monospace',
+    fontFamily: 'consolas, monospace',
   },
   activeTab: {
     backgroundColor: '#444',
@@ -349,6 +359,9 @@ const styles = {
 const injectCss = () => {
   const styleEl = document.createElement('style');
   styleEl.textContent = `
+		.light {background-color: #f9f9f9; color: #313131}
+		.dark {background-color: #313131; color: #fdf5e6}
+
     .read-only-code-line {
       cursor: pointer !important;
       opacity: 0.8;
@@ -365,6 +378,14 @@ const injectCss = () => {
     .read-only-code-text {
       cursor: pointer;
     }
+
+		.light .highlight-code-line {
+			background: rgba(255, 235, 59, 0.4) !important;
+		}
+
+		.dark .highlight-code-line {
+			background: rgba(255, 193, 7, 0.35) !important;
+		}
   `;
   document.head.appendChild(styleEl);
 };

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { FaPlay } from 'react-icons/fa';
+import { FaPlay, FaHighlighter } from 'react-icons/fa';
 
 import ContestEditor from '../src/components/ContestEditor';
 
@@ -60,6 +60,8 @@ const App = () => {
   const [isTabPanelFolded, setIsTabPanelFolded] = useState(false);
   // Add ref to control the ContestEditor
   const contestEditorRef = useRef(null);
+  // Add state to track which file is being highlighted
+  const [highlightExample, setHighlightExample] = useState(0);
 
   const handleThemeChange = (e) => {
     setTheme(e.target.value);
@@ -82,6 +84,34 @@ const App = () => {
   // Handler for tab changes
   const handleTabChange = (index, tab) => {
     console.log(`Tab changed to "${tab.label}" (index: ${index})`);
+  };
+
+  // Example highlight function that cycles through different examples
+  const handleHighlight = () => {
+    if (!contestEditorRef.current) return;
+
+    // Example highlight patterns for different files
+    const highlightExamples = [
+      { file: "main.py", lines: [5, 6] },
+			{ file: "main.py", lines: [] },
+      { file: "main.py", lines: [4, 5, 6] },
+      { file: "script.js", lines: [1, 2] },
+      { file: "script.js", lines: [4] },
+      { file: "test.txt", lines: [0] }
+    ];
+
+    // Get current example and apply highlight
+    const example = highlightExamples[highlightExample % highlightExamples.length];
+    contestEditorRef.current.highlight(example.file, example.lines);
+
+    // Update terminal with information about highlight
+    contestEditorRef.current.addTerminalEntry({
+      type: 'system',
+      content: `Highlighted ${example.file}, lines: [${example.lines.join(', ')}]`
+    });
+
+    // Move to next example
+    setHighlightExample(prev => (prev + 1) % highlightExamples.length);
   };
 
   // Returns a Promise for the submission process
@@ -261,7 +291,8 @@ const App = () => {
             '  clear   - Clear the terminal',
             '  about   - Show information about the editor',
             '  tab:info - Switch to Info tab',
-            '  tab:test - Switch to Test Cases tab'
+            '  tab:test - Switch to Test Cases tab',
+            '  highlight - Highlight code lines'
           ]);
           break;
         case 'run':
@@ -276,6 +307,10 @@ const App = () => {
             contestEditorRef.current.clearTerminal();
           }
           callback(null);
+          break;
+        case 'highlight':
+          handleHighlight();
+          callback(['Highlighting code examples']);
           break;
         case 'about':
           callback([
@@ -337,12 +372,28 @@ const App = () => {
     }
   };
 
+  // Highlight button styles
+  const highlightButtonStyles = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    backgroundColor: '#9c27b0',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    marginLeft: '20px',
+    fontWeight: 'bold',
+    transition: 'background-color 0.3s ease',
+  };
+
   return (
     <div style={{ width: '100%', margin: '12px auto', padding: '0 20px' }}>
       <h2>React Contest Editor Example</h2>
       <p>A lightweight React-based code editor for live coding contests, built on monaco-ext.</p>
 
-      {/* Theme selector */}
+      {/* Theme selector and controls */}
       <div style={themeSelectStyles.container}>
         <label style={themeSelectStyles.label}>Theme:</label>
         <select
@@ -356,6 +407,15 @@ const App = () => {
             </option>
           ))}
         </select>
+
+        {/* Highlight button */}
+        <button
+          onClick={handleHighlight}
+          style={highlightButtonStyles}
+          title="Highlight code examples"
+        >
+          <FaHighlighter /> Highlight Code
+        </button>
 
         {/* Display current TabPanel state */}
         <div style={{ marginLeft: '20px', fontSize: '14px', color: '#666' }}>
@@ -381,7 +441,7 @@ const App = () => {
         terminalTitle="Terminal"
         initialTerminalHistory={[
           { type: 'output', content: 'Welcome to the Terminal! Type a command and press Enter.' },
-          { type: 'output', content: 'Try using commands like "help", "run", or "clear".' }
+          { type: 'output', content: 'Try using commands like "help", "run", "highlight", or "clear".' }
         ]}
         onCommand={handleTerminalCommand}
         terminalPrompt="$ "
@@ -413,6 +473,7 @@ const App = () => {
           <li>Auto-switch to Test Cases tab after successful code submission</li>
           <li>Internal terminal management in ContestEditor component</li>
           <li>Promise-based submission handling with result/error feedback</li>
+          <li>Code line highlighting functionality (try clicking "Highlight Code" button or typing "highlight" in terminal)</li>
         </ul>
       </div>
     </div>

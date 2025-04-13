@@ -187,6 +187,13 @@ const ContestEditor = forwardRef(({
     }
   };
 
+  // Provide highlight method to highlight specific lines in a file
+  const highlight = (filename, lines) => {
+    if (editorCtrl.current && editorCtrl.current.highlight) {
+      editorCtrl.current.highlight(filename, lines);
+    }
+  };
+
   // Expose methods to parent components via ref
   useImperativeHandle(ref, () => ({
     // Method to switch tab programmatically
@@ -210,7 +217,9 @@ const ContestEditor = forwardRef(({
     // Method to toggle terminal fold state
     toggleTerminalFold: () => setIsTerminalFolded(prev => !prev),
     // Get terminal fold state
-    isTerminalFolded: () => isTerminalFolded
+    isTerminalFolded: () => isTerminalFolded,
+    // Method to highlight specific lines in a file
+    highlight
   }));
 
   // Handle fold state changes
