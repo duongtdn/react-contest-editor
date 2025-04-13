@@ -1,6 +1,13 @@
 import React, { useState, useEffect, forwardRef, useRef } from 'react';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
+/**
+ * TabPanel component that displays content in tabs on the left side of the editor.
+ * Takes full height to match the Editor and Terminal components.
+ * Tab bar is always in dark mode for consistency.
+ * Includes fold/unfold functionality to collapse into a vertical icon bar.
+ * Can be controlled externally by providing activeTabIndex prop.
+ */
 const TabPanel = forwardRef(({
   tabs = [],
   defaultActiveTab = 0,
@@ -15,8 +22,9 @@ const TabPanel = forwardRef(({
   const [isFolded, setIsFolded] = useState(false);
   const isDarkTheme = theme.includes('dark');
   const headerRef = useRef(null);
-  const [tabHeaderHeight, setTabHeaderHeight] = useState(40);
+  const [tabHeaderHeight, setTabHeaderHeight] = useState(40); // Default until measured
 
+  // Use external tab index if provided, otherwise use internal state
   const activeTabIndex = externalActiveTabIndex !== null ? externalActiveTabIndex : internalActiveTabIndex;
 
   useEffect(() => {
@@ -25,6 +33,7 @@ const TabPanel = forwardRef(({
     }
   }, [externalActiveTabIndex]);
 
+  // Measure actual header height after render
   useEffect(() => {
     if (headerRef.current && !isFolded) {
       const height = headerRef.current.getBoundingClientRect().height;
@@ -32,13 +41,17 @@ const TabPanel = forwardRef(({
     }
   }, [isFolded]);
 
+  // Calculate tab content height by subtracting tab header height
   const tabContentHeight = height ? `${height - tabHeaderHeight}px` : '100%';
 
+  // Theme-specific colors
   const colors = {
     background: isDarkTheme ? '#1e1e1e' : '#f8f8f8',
-    headerBg: '#333', // Tab bar is always dark regardless of theme
+    // Tab bar is always dark regardless of theme
+    headerBg: '#333',
     text: isDarkTheme ? '#f0f0f0' : '#333',
     buttonBorder: isDarkTheme ? '#666' : '#ddd',
+    // Active tab is always dark
     activeTabBg: '#444',
     activeBorder: '#007acc'
   };
@@ -109,6 +122,7 @@ const TabPanel = forwardRef(({
             ))}
           </div>
 
+          {/* Fold button */}
           <div
             style={{
               padding: '8px',
@@ -134,6 +148,7 @@ const TabPanel = forwardRef(({
           height: height ? `${height - tabHeaderHeight}px` : '100%',
           alignItems: 'center',
         }}>
+          {/* Unfold button at the top */}
           <div
             style={{
               padding: '12px',
@@ -151,6 +166,7 @@ const TabPanel = forwardRef(({
             <FiChevronRight />
           </div>
 
+          {/* Vertical tabs with icons only */}
           {tabs.map((tab, index) => (
             <div
               key={index}

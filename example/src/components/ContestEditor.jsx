@@ -42,17 +42,13 @@ const ContestEditor = forwardRef(({
 
 	height = '600px',
 }, ref) => {
+
   // Keep theme synchronized between editor and terminal
   const theme = editorTheme;
 
-  // Track TabPanel folded state
   const [isTabPanelFolded, setIsTabPanelFolded] = useState(false);
 
-  // Track active tab
   const [activeTabIndex, setActiveTabIndex] = useState(initialActiveTab);
-
-  // Store container height for TabPanel height calculation
-  const [containerHeight, setContainerHeight] = useState(0);
 
   // Container ref for height measurement
   const containerRef = useRef(null);
@@ -73,7 +69,6 @@ const ContestEditor = forwardRef(({
     }
   ];
 
-  // Use provided tabs or default tabs
   const tabs = leftTabs || defaultTabs;
 
   // Internal submission state
@@ -82,7 +77,6 @@ const ContestEditor = forwardRef(({
   // Internal terminal history state
   const [terminalHistory, setTerminalHistory] = useState(initialTerminalHistory);
 
-  // Refs for components
   const editorCtrl = useRef();
   const rightPanelRef = useRef();
   const tabPanelRef = useRef();
@@ -102,7 +96,6 @@ const ContestEditor = forwardRef(({
     setTerminalHistory(prev => [...prev, ...entries]);
   };
 
-  // Handle terminal commands internally
   const handleTerminalCommand = (command, callback) => {
     if (onCommand) {
       onCommand(command, (response) => {
@@ -118,28 +111,23 @@ const ContestEditor = forwardRef(({
     }
   };
 
-  // Handle submission with Promise
   const handleSubmit = async (editorContents) => {
-    // Set internal submitting state
     setIsSubmitting(true);
 
-    // Add submission notification to terminal
     addTerminalEntry({
       type: 'output',
       content: `Submitting code at ${new Date().toLocaleTimeString()}...`
     });
 
     try {
-      // Call external onSubmit handler which should return a Promise
+
       const result = await onSubmit(editorContents);
 
-      // Check if there's an error in the code (syntax error, runtime error, etc.)
       if (result.error) {
         addTerminalEntry({ type: 'error', content: result.error });
         return result;
       }
 
-      // Check compilation status
       if (!result.compile?.isPass) {
         addTerminalEntry({ type: 'error', content: 'Compilation error:' });
         if (result?.error) {
@@ -148,7 +136,6 @@ const ContestEditor = forwardRef(({
         return result;
       }
 
-      // Handle successful execution
       const isAllTestsPassed = result.evaluate?.isPass;
       const testCases = result.evaluate?.testcases || [];
 
@@ -228,7 +215,6 @@ const ContestEditor = forwardRef(({
       });
       throw error; // Re-throw to let the parent component handle it if needed
     } finally {
-      // Reset submitting state
       setIsSubmitting(false);
     }
   };
@@ -284,7 +270,6 @@ const ContestEditor = forwardRef(({
 
     resizeObserver.observe(rightPanelRef.current);
 
-    // Cleanup observer on component unmount
     return () => {
       resizeObserver.disconnect();
     };
@@ -342,7 +327,7 @@ const styles = {
     flexDirection: 'row',
     width: '100%',
     height: '100%',
-    overflow: 'hidden', // Prevent scrolling in the container itself
+    overflow: 'hidden',
   },
   rightPanel: {
     display: 'flex',

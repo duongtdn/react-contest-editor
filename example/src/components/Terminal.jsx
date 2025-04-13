@@ -20,7 +20,6 @@ const Terminal = ({
   const inputRef = useRef(null);
   const scrollHandlerRef = useRef(null);
 
-  // Generate theme-specific styles
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   useEffect(() => {
@@ -41,12 +40,11 @@ const Terminal = ({
     if (e.key === 'Enter' && currentInput.trim() !== '') {
       const command = currentInput.trim();
 
-      // Update the terminal with the command
+			// insert command into lines
       const newLines = [...lines, { type: 'command', content: `${prompt}${command}` }];
       setLines(newLines);
       setCurrentInput('');
 
-      // Call the onCommand prop if provided
       if (typeof onCommand === 'function') {
         onCommand(command, (output) => {
           if (output) {
