@@ -124,7 +124,7 @@ const ContestEditor = forwardRef(({
 
   const handleSubmit = async (editorContents) => {
     setIsSubmitting(true);
-
+		setTestCasesResult([]);
     addTerminalEntry({
       type: 'output',
       content: `Submitting code at ${new Date().toLocaleTimeString()}...`
