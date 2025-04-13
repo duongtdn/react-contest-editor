@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef, useMemo } from 'react';
 import { FaPaperPlane, FaInfo } from 'react-icons/fa';
 import { GrTest } from "react-icons/gr";
 
@@ -6,6 +6,7 @@ import Editor from './Editor';
 import Terminal from './Terminal';
 import TabPanel from './TabPanel';
 import InfoPanel from './InfoPanel';
+import TestCasesPanel from './TestCasesPanel';
 
 /**
  * ContestEditor component that combines TabPanel, Editor and Terminal components
@@ -52,6 +53,15 @@ const ContestEditor = forwardRef(({
 
   const [activeTabIndex, setActiveTabIndex] = useState(initialActiveTab);
 
+  // Internal submission state
+  const [isSubmitting, setIsSubmitting] = useState(externalIsSubmitting);
+
+  // Internal terminal history state
+  const [terminalHistory, setTerminalHistory] = useState(initialTerminalHistory);
+
+  // Test cases state for the TestCasesPanel
+  const [testCasesResult, setTestCasesResult] = useState([]);
+
   // Container ref for height measurement
   const containerRef = useRef(null);
 
@@ -60,29 +70,23 @@ const ContestEditor = forwardRef(({
   const terminalHeight = isTerminalFolded ? 40 : Math.floor(numericHeight / 3); // Just header height when folded, or 1/3 of total height
   const editorHeight = numericHeight - terminalHeight;
 
-  // Default tabs configuration using InfoPanel for Info tab
-  const defaultTabs = [
+  // Use useMemo to recreate tabs when testCasesResult or theme changes
+  const defaultTabs = useMemo(() => [
     {
       label: 'Info',
       icon: <FaInfo />,
       title: 'Contest Information',
-      content: <InfoPanel problem={contest.problem} hint={contest.hint} />
+      content: <InfoPanel problem={contest.problem} hint={contest.hint} theme={theme} />
     },
     {
       label: 'Test Cases',
       icon: <GrTest />,
-      title: 'Task List',
-      content: <div>Test Cases goes here</div>
+      title: 'Test Cases',
+      content: <TestCasesPanel testCases={testCasesResult} theme={theme} />
     }
-  ];
+  ], [testCasesResult, theme, contest]);
 
   const tabs = leftTabs || defaultTabs;
-
-  // Internal submission state
-  const [isSubmitting, setIsSubmitting] = useState(externalIsSubmitting);
-
-  // Internal terminal history state
-  const [terminalHistory, setTerminalHistory] = useState(initialTerminalHistory);
 
   const editorCtrl = useRef();
   const rightPanelRef = useRef();
@@ -154,6 +158,9 @@ const ContestEditor = forwardRef(({
       const isAllTestsPassed = result.evaluate?.isPass;
       const testCases = result.evaluate?.testcases || [];
 
+      // Store test cases result for TestCasesPanel
+      setTestCasesResult(testCases);
+
       // Display test results summary
       addTerminalEntry({ type: 'output', content: 'Submission successful!' });
       addTerminalEntry({
@@ -163,63 +170,10 @@ const ContestEditor = forwardRef(({
           : `⚠️ ${testCases.filter(t => t.isPass).length}/${testCases.length} test cases passed.`
       });
 
-      // Add detailed test case results for failing tests
-      if (!isAllTestsPassed) {
-        addTerminalEntry({ type: 'output', content: '\nTest case results:' });
-
-        testCases.forEach((test, index) => {
-          // Skip detailed output for hidden test cases
-          if (test.hidden) {
-            addTerminalEntry({
-              type: test.isPass ? 'output' : 'error',
-              content: `${test.isPass ? '✅' : '❌'} Test #${index+1}: ${test.title} ${test.hidden ? '(hidden)' : ''}`
-            });
-          } else if (!test.isPass) {
-            // Show details only for failing non-hidden tests
-            addTerminalEntry({
-              type: 'error',
-              content: `❌ Test #${index+1}: ${test.title}`
-            });
-
-            if (test.description) {
-              addTerminalEntry({
-                type: 'output',
-                content: `   Description: ${test.description}`
-              });
-            }
-
-            if (test.stdin) {
-              addTerminalEntry({
-                type: 'output',
-                content: `   Input: ${test.stdin}`
-              });
-            }
-
-            if (test.stdout) {
-              addTerminalEntry({
-                type: 'error',
-                content: `   Your output: ${test.stdout}`
-              });
-              addTerminalEntry({
-                type: 'output',
-                content: `   Expected: ${test.expectedStdout}`
-              });
-            }
-
-            if (test.stderr) {
-              addTerminalEntry({
-                type: 'error',
-                content: `   Error: ${test.stderr}`
-              });
-            }
-          }
-        });
-
-        const testCasesTabIndex = tabs.findIndex(tab => tab.label === 'Test Cases');
-				if (testCasesTabIndex !== -1) {
-					setActiveTabIndex(testCasesTabIndex);
-				}
-      }
+			const testCasesTabIndex = tabs.findIndex(tab => tab.label === 'Test Cases');
+			if (testCasesTabIndex !== -1) {
+				setActiveTabIndex(testCasesTabIndex);
+			}
 
       return result;
     } catch (error) {
