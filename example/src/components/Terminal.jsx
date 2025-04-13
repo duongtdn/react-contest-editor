@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import ScrollBox from '@duongtdn/react-scrollbox';
-import { FaCopy, FaTrash, FaCheck, FaTerminal } from 'react-icons/fa';
+import { FaCopy, FaTrash, FaCheck, FaTerminal, FaAngleUp, FaAngleDown } from 'react-icons/fa';
 
 const Terminal = ({
   title = 'Terminal',
@@ -9,19 +9,26 @@ const Terminal = ({
   prompt = '$ ',
   readOnly = false,
   theme = 'github-dark',
-  height = 300
+  height = 300,
+  onFoldChange = null,
+  isFolded: controlledFold = null
 }) => {
   const [lines, setLines] = useState(history);
   const [currentInput, setCurrentInput] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  const [internalFolded, setInternalFolded] = useState(false);
   const [buttonStates, setButtonStates] = useState({
     clear: { hover: false },
     copy: { hover: false },
+    fold: { hover: false },
   });
   const inputRef = useRef(null);
   const scrollHandlerRef = useRef(null);
 
-  const styles = useMemo(() => createStyles(theme, height), [theme, height]);
+  // Use controlled fold state if provided, otherwise use internal state
+  const isFolded = controlledFold !== null ? controlledFold : internalFolded;
+
+  const styles = useMemo(() => createStyles(theme, height, isFolded), [theme, height, isFolded]);
 
   useEffect(() => {
     setLines(history);
@@ -33,6 +40,13 @@ const Terminal = ({
     }
   }, [history]);
 
+  // Call the onFoldChange callback when folded state changes
+  useEffect(() => {
+    if (typeof onFoldChange === 'function') {
+      onFoldChange(isFolded);
+    }
+  }, [isFolded, onFoldChange]);
+
   const handleInputChange = (e) => {
     setCurrentInput(e.target.value);
   };
@@ -41,7 +55,7 @@ const Terminal = ({
     if (e.key === 'Enter' && currentInput.trim() !== '') {
       const command = currentInput.trim();
 
-			// insert command into lines
+      // insert command into lines
       const newLines = [...lines, { type: 'command', content: `${prompt}${command}` }];
       setLines(newLines);
       setCurrentInput('');
@@ -58,10 +72,10 @@ const Terminal = ({
             setLines(updatedLines);
 
             setTimeout(() => {
-							if (scrollHandlerRef.current) {
-								scrollHandlerRef.current.scrollToBottom();
-							}
-						}, 10);
+              if (scrollHandlerRef.current) {
+                scrollHandlerRef.current.scrollToBottom();
+              }
+            }, 10);
           }
         });
       }
@@ -85,6 +99,16 @@ const Terminal = ({
       .catch(err => console.error('Failed to copy terminal content', err));
   };
 
+  const handleFoldToggle = () => {
+    // Update internal state if we're not controlled
+    setInternalFolded(!isFolded);
+
+    // Also call onFoldChange to inform parent of the requested change
+    if (typeof onFoldChange === 'function') {
+      onFoldChange(!isFolded);
+    }
+  };
+
   const handleTerminalClick = () => {
     if (inputRef.current && !readOnly) {
       inputRef.current.focus();
@@ -104,76 +128,97 @@ const Terminal = ({
       <div style={styles.header}>
         <h3 style={styles.title}><FaTerminal style={styles.icon} /> {title}</h3>
         <div style={styles.buttons}>
-          <div style={styles.tooltipContainer}>
-            <button
-              style={{
-                ...styles.button,
-                ...(buttonStates.copy.hover ? styles.buttonHover : {})
-              }}
-              onClick={handleCopy}
-              onMouseEnter={() => handleButtonHover('copy', true)}
-              onMouseLeave={() => handleButtonHover('copy', false)}
-              title={isCopied ? "Copied!" : "Copy terminal content"}
-            >
-              {isCopied ? <FaCheck size={14} color={theme.includes('dark') ? "#4CAF50" : "#0c7d15"} /> : <FaCopy size={14} />}
-            </button>
-          </div>
+          {!isFolded && (
+            <>
+              <div style={styles.tooltipContainer}>
+                <button
+                  style={{
+                    ...styles.button,
+                    ...(buttonStates.copy.hover ? styles.buttonHover : {})
+                  }}
+                  onClick={handleCopy}
+                  onMouseEnter={() => handleButtonHover('copy', true)}
+                  onMouseLeave={() => handleButtonHover('copy', false)}
+                  title={isCopied ? "Copied!" : "Copy terminal content"}
+                >
+                  {isCopied ? <FaCheck size={14} color={theme.includes('dark') ? "#4CAF50" : "#0c7d15"} /> : <FaCopy size={14} />}
+                </button>
+              </div>
+
+              <div style={styles.tooltipContainer}>
+                <button
+                  style={{
+                    ...styles.button,
+                    ...(buttonStates.clear.hover ? styles.buttonHover : {})
+                  }}
+                  onClick={handleClear}
+                  onMouseEnter={() => handleButtonHover('clear', true)}
+                  onMouseLeave={() => handleButtonHover('clear', false)}
+                  title="Clear terminal"
+                >
+                  <FaTrash size={14} />
+                </button>
+              </div>
+            </>
+          )}
 
           <div style={styles.tooltipContainer}>
             <button
               style={{
                 ...styles.button,
-                ...(buttonStates.clear.hover ? styles.buttonHover : {})
+                ...(buttonStates.fold.hover ? styles.buttonHover : {})
               }}
-              onClick={handleClear}
-              onMouseEnter={() => handleButtonHover('clear', true)}
-              onMouseLeave={() => handleButtonHover('clear', false)}
-              title="Clear terminal"
+              onClick={handleFoldToggle}
+              onMouseEnter={() => handleButtonHover('fold', true)}
+              onMouseLeave={() => handleButtonHover('fold', false)}
+              title={isFolded ? "Expand terminal" : "Fold terminal"}
             >
-              <FaTrash size={14} />
+              {isFolded ? <FaAngleUp size={14} /> : <FaAngleDown size={14} />}
             </button>
           </div>
         </div>
       </div>
 
-      <div style={styles.terminalContent} onClick={handleTerminalClick}>
-        <ScrollBox
-          alwaysShowScrollBar={true}
-          onMounted={(handler) => scrollHandlerRef.current = handler}
-        >
-          <div style={styles.scrollBoxContent}>
-            {lines.map((line, index) => (
-              <div key={index} style={{
-                ...styles.line,
-                ...(line.type === 'error' ? styles.errorLine : {})
-              }}>
-                {line.content}
-              </div>
-            ))}
-            {!readOnly && (
-              <div style={styles.promptLine}>
-                <span style={styles.prompt}>{prompt}</span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  style={styles.input}
-                  value={currentInput}
-                  onChange={handleInputChange}
-                  onKeyDown={handleInputKeyDown}
-                  autoFocus
-                />
-              </div>
-            )}
-          </div>
-        </ScrollBox>
-      </div>
+      {!isFolded && (
+        <div style={styles.terminalContent} onClick={handleTerminalClick}>
+          <ScrollBox
+            alwaysShowScrollBar={true}
+            onMounted={(handler) => scrollHandlerRef.current = handler}
+          >
+            <div style={styles.scrollBoxContent}>
+              {lines.map((line, index) => (
+                <div key={index} style={{
+                  ...styles.line,
+                  ...(line.type === 'error' ? styles.errorLine : {})
+                }}>
+                  {line.content}
+                </div>
+              ))}
+              {!readOnly && (
+                <div style={styles.promptLine}>
+                  <span style={styles.prompt}>{prompt}</span>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    style={styles.input}
+                    value={currentInput}
+                    onChange={handleInputChange}
+                    onKeyDown={handleInputKeyDown}
+                    autoFocus
+                  />
+                </div>
+              )}
+            </div>
+          </ScrollBox>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Terminal;
 
-const createStyles = (theme = 'github-dark', height = 300) => {
+const createStyles = (theme = 'github-dark', height = 300, isFolded = false) => {
   const isDarkTheme = theme.includes('dark');
 
   // Theme-specific colors
@@ -201,7 +246,7 @@ const createStyles = (theme = 'github-dark', height = 300) => {
       backgroundColor: colors.background,
       color: colors.text,
       width: '100%',
-      height: `${height}px`,
+      height: isFolded ? 'auto' : `${height}px`,
       display: 'flex',
       flexDirection: 'column',
     },
