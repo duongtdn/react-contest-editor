@@ -33,6 +33,8 @@ const InfoPanel = ({ problem = [], hint = [], theme = 'github-dark' }) => {
                           <SyntaxHighlighter
                             style={isDarkTheme ? vscDarkPlus : vs}
                             language={language}
+														wrapLines={true}
+														lineProps = {{ style: { whiteSpace: 'pre-wrap', fontSize: '1.2em' } }}
                             PreTag="div"
                             {...props}
                           >
@@ -77,6 +79,8 @@ const InfoPanel = ({ problem = [], hint = [], theme = 'github-dark' }) => {
                                 <SyntaxHighlighter
                                   style={isDarkTheme ? vscDarkPlus : vs}
                                   language={language}
+																	wrapLines={true}
+																	lineProps = {{ style: { whiteSpace: 'pre-wrap', fontSize: '1.2em' } }}
                                   PreTag="div"
                                   {...props}
                                 >
