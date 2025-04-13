@@ -5,8 +5,8 @@ import { GrTest } from "react-icons/gr";
 import Editor from './Editor';
 import Terminal from './Terminal';
 import TabPanel from './TabPanel';
-import InfoPanel from './InfoPanel';
-import TestCasesPanel from './TestCasesPanel';
+import InfoPanel from './InfoTab';
+import TestCasesPanel from './TestCasesTab';
 
 /**
  * ContestEditor component that combines TabPanel, Editor and Terminal components

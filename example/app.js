@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FaPlay } from 'react-icons/fa';
 
-import ContestEditor from './src/components/ContestEditor';
+import ContestEditor from '../src/components/ContestEditor';
 
 // Available themes for the editor
 const THEMES = [
