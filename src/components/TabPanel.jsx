@@ -13,7 +13,6 @@ const TabPanel = forwardRef(({
   defaultActiveTab = 0,
   activeTabIndex: externalActiveTabIndex = null,
   onTabChange = () => {},
-  width = '250px',
   theme = 'github-dark',
   onFoldChange = () => {},
   height = '100%',
@@ -74,7 +73,8 @@ const TabPanel = forwardRef(({
       border: '1px solid #666',
       borderRadius: '4px',
       overflow: 'hidden',
-      width: isFolded ? '48px' : width,
+      width: isFolded ? '48px' : 'auto',
+      flex: isFolded ? 'none' : 1, // Takes 1/3 of the space when not folded (ContestEditor sets right panel to flex: 2)
       backgroundColor: isFolded ? colors.headerBg : colors.background,
       marginRight: '8px',
       transition: 'width 0.3s ease',

@@ -33,7 +33,6 @@ const ContestEditor = forwardRef(({
   contest = { problem: [], hint: [] },
 
   // TabPanel props
-  tabPanelWidth = '450px',
   leftTabs = null, // Set default to null so we can provide default below
   initialActiveTab = 0,
   onTabChange = null,
@@ -272,7 +271,6 @@ const ContestEditor = forwardRef(({
         defaultActiveTab={initialActiveTab}
         activeTabIndex={activeTabIndex}
         onTabChange={handleTabChange}
-        width={tabPanelWidth}
         theme={theme}
         onFoldChange={handleTabPanelFoldChange}
         height={height}
@@ -324,15 +322,7 @@ const styles = {
   rightPanel: {
     display: 'flex',
     flexDirection: 'column',
-    flex: 1,
-    overflow: 'hidden',
-  },
-  editorContainer: {
-    flex: 2,
-    overflow: 'hidden',
-  },
-  terminalContainer: {
-    flex: 1,
+    flex: 2, // Takes 2/3 of the available space
     overflow: 'hidden',
   }
 };
