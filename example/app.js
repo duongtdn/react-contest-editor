@@ -14,6 +14,22 @@ const THEMES = [
   { value: 'solarized-dark', label: 'Solarized Dark' }
 ];
 
+// Contest data including problem description and hint
+const contestData = {
+  problem: [
+    {
+      type: "Markdown",
+      content: "# Sum Two Numbers\n\nImplement a function `sum_numbers(a, b)` that returns the sum of two numbers.\n\n## Requirements\n\n- The function should handle both positive and negative numbers\n- The function should return the sum of the two input parameters\n\n## Example\n\n```python\nsum_numbers(5, 3)  # returns 8\nsum_numbers(-5, 8)  # returns 3\nsum_numbers(0, 0)   # returns 0\n```\n\n## Implementation\n\nComplete the `sum_numbers` function in the editor:"
+    }
+  ],
+  hint: [
+    {
+      type: "Markdown",
+      content: "### Hint 1\nRemember that Python's addition operator is `+`.\n\n```python\ndef sum_numbers(a, b):\n    return a + b  # Simply return the sum of a and b\n```\n\n### Hint 2\nMake sure your function handles negative numbers correctly. Test with various inputs."
+    }
+  ]
+};
+
 // Example file configuration
 const files = [
   {
@@ -358,6 +374,9 @@ const App = () => {
         submittingButtonText="Running..."
         SubmitIcon={FaPlay}
 
+        // Contest data
+        contest={contestData}
+
         // Terminal props
         terminalTitle="Terminal"
         initialTerminalHistory={[
@@ -372,6 +391,8 @@ const App = () => {
         initialActiveTab={0}
         onTabChange={handleTabChange}
         onTabPanelFoldChange={handleTabPanelFoldChange}
+
+				height="500px"
       />
 
       <div style={{ marginTop: '20px', fontSize: '14px', color: '#666' }}>

@@ -5,6 +5,7 @@ import { GrTest } from "react-icons/gr";
 import Editor from './Editor';
 import Terminal from './Terminal';
 import TabPanel from './TabPanel';
+import InfoPanel from './InfoPanel';
 
 /**
  * ContestEditor component that combines TabPanel, Editor and Terminal components
@@ -27,27 +28,19 @@ const ContestEditor = forwardRef(({
   terminalPrompt = '$ ',
   terminalReadOnly = false,
 
+  // Contest data prop
+  contest = { problem: [], hint: [] },
+
   // TabPanel props
   tabPanelWidth = '450px',
-  leftTabs = [
-    {
-      label: 'Info',
-      icon: <FaInfo />,
-      title: 'Contest Information',
-      content: <div>Contest information goes here</div>
-    },
-    {
-      label: 'Test Cases',
-      icon: <GrTest />,
-      title: 'Task List',
-      content: <div>Test Cases goes here</div>
-    }
-  ],
+  leftTabs = null, // Set default to null so we can provide default below
   initialActiveTab = 0,
   onTabChange = null,
 
   // Panel state callbacks
-  onTabPanelFoldChange = null
+  onTabPanelFoldChange = null,
+
+	height = '600px',
 }, ref) => {
   // Keep theme synchronized between editor and terminal
   const theme = editorTheme;
@@ -57,6 +50,31 @@ const ContestEditor = forwardRef(({
 
   // Track active tab
   const [activeTabIndex, setActiveTabIndex] = useState(initialActiveTab);
+
+  // Store container height for TabPanel height calculation
+  const [containerHeight, setContainerHeight] = useState(0);
+
+  // Container ref for height measurement
+  const containerRef = useRef(null);
+
+  // Default tabs configuration using InfoPanel for Info tab
+  const defaultTabs = [
+    {
+      label: 'Info',
+      icon: <FaInfo />,
+      title: 'Contest Information',
+      content: <InfoPanel problem={contest.problem} hint={contest.hint} />
+    },
+    {
+      label: 'Test Cases',
+      icon: <GrTest />,
+      title: 'Task List',
+      content: <div>Test Cases goes here</div>
+    }
+  ];
+
+  // Use provided tabs or default tabs
+  const tabs = leftTabs || defaultTabs;
 
   // Internal submission state
   const [isSubmitting, setIsSubmitting] = useState(externalIsSubmitting);
@@ -195,7 +213,7 @@ const ContestEditor = forwardRef(({
           }
         });
 
-        const testCasesTabIndex = leftTabs.findIndex(tab => tab.label === 'Test Cases');
+        const testCasesTabIndex = tabs.findIndex(tab => tab.label === 'Test Cases');
 				if (testCasesTabIndex !== -1) {
 					setActiveTabIndex(testCasesTabIndex);
 				}
@@ -219,7 +237,7 @@ const ContestEditor = forwardRef(({
   useImperativeHandle(ref, () => ({
     // Method to switch tab programmatically
     switchTab: (tabIndex) => {
-      if (tabIndex >= 0 && tabIndex < leftTabs.length) {
+      if (tabIndex >= 0 && tabIndex < tabs.length) {
         setActiveTabIndex(tabIndex);
       }
     },
@@ -227,7 +245,7 @@ const ContestEditor = forwardRef(({
     getActiveTabIndex: () => activeTabIndex,
     // Method to find tab index by label
     findTabIndexByLabel: (label) => {
-      return leftTabs.findIndex(tab => tab.label === label);
+      return tabs.findIndex(tab => tab.label === label);
     },
     // Method to add terminal entries
     addTerminalEntry,
@@ -240,18 +258,17 @@ const ContestEditor = forwardRef(({
   // Handle fold state changes
   const handleTabPanelFoldChange = (foldedState) => {
     setIsTabPanelFolded(foldedState);
-    // Call external handler if provided
+
     if (onTabPanelFoldChange) {
       onTabPanelFoldChange(foldedState);
     }
   };
 
-  // Handle tab changes
+
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
-    // Call external handler if provided
     if (onTabChange) {
-      onTabChange(index, leftTabs[index]);
+      onTabChange(index, tabs[index]);
     }
   };
 
@@ -274,17 +291,18 @@ const ContestEditor = forwardRef(({
   }, []);
 
   return (
-    <div style={styles.container}>
+    <div ref={containerRef} style={{ ...styles.container, height }}>
       {/* TabPanel Component on the left */}
       <TabPanel
         ref={tabPanelRef}
-        tabs={leftTabs}
+        tabs={tabs}
         defaultActiveTab={initialActiveTab}
         activeTabIndex={activeTabIndex}
         onTabChange={handleTabChange}
         width={tabPanelWidth}
         theme={theme}
         onFoldChange={handleTabPanelFoldChange}
+        height={height}
       />
 
       {/* Editor and Terminal Stack on the right */}

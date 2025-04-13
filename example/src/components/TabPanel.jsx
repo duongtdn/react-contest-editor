@@ -1,14 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useRef } from 'react';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
-/**
- * TabPanel component that displays content in tabs on the left side of the editor.
- * Takes full height to match the Editor and Terminal components.
- * Tab bar is always in dark mode for consistency.
- * Includes fold/unfold functionality to collapse into a vertical icon bar.
- * Can be controlled externally by providing activeTabIndex prop.
- */
-const TabPanel = ({
+const TabPanel = forwardRef(({
   tabs = [],
   defaultActiveTab = 0,
   activeTabIndex: externalActiveTabIndex = null,
@@ -16,29 +9,36 @@ const TabPanel = ({
   width = '250px',
   theme = 'github-dark',
   onFoldChange = () => {},
-}) => {
+  height = '100%',
+}, ref) => {
   const [internalActiveTabIndex, setInternalActiveTabIndex] = useState(defaultActiveTab);
   const [isFolded, setIsFolded] = useState(false);
   const isDarkTheme = theme.includes('dark');
+  const headerRef = useRef(null);
+  const [tabHeaderHeight, setTabHeaderHeight] = useState(40);
 
-  // Use external tab index if provided, otherwise use internal state
   const activeTabIndex = externalActiveTabIndex !== null ? externalActiveTabIndex : internalActiveTabIndex;
 
-  // Update internal state when external prop changes
   useEffect(() => {
     if (externalActiveTabIndex !== null) {
       setInternalActiveTabIndex(externalActiveTabIndex);
     }
   }, [externalActiveTabIndex]);
 
-  // Theme-specific colors
+  useEffect(() => {
+    if (headerRef.current && !isFolded) {
+      const height = headerRef.current.getBoundingClientRect().height;
+      setTabHeaderHeight(height);
+    }
+  }, [isFolded]);
+
+  const tabContentHeight = height ? `${height - tabHeaderHeight}px` : '100%';
+
   const colors = {
     background: isDarkTheme ? '#1e1e1e' : '#f8f8f8',
-    // Tab bar is always dark regardless of theme
-    headerBg: '#333',
+    headerBg: '#333', // Tab bar is always dark regardless of theme
     text: isDarkTheme ? '#f0f0f0' : '#333',
     buttonBorder: isDarkTheme ? '#666' : '#ddd',
-    // Active tab is always dark
     activeTabBg: '#444',
     activeBorder: '#007acc'
   };
@@ -64,18 +64,19 @@ const TabPanel = ({
       width: isFolded ? '48px' : width,
       backgroundColor: isFolded ? colors.headerBg : colors.background,
       marginRight: '8px',
-      alignSelf: 'stretch',
       transition: 'width 0.3s ease',
+      height: height ? `${height}px` : '100%',
     }}>
       {!isFolded && (
-        <div style={{
+        <div ref={headerRef} style={{
           display: 'flex',
           backgroundColor: colors.headerBg,
           padding: '0',
           margin: '0',
           listStyle: 'none',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          height: `${tabHeaderHeight}px`,
         }}>
           <div style={{
             display: 'flex',
@@ -108,7 +109,6 @@ const TabPanel = ({
             ))}
           </div>
 
-          {/* Fold/unfold button */}
           <div
             style={{
               padding: '8px',
@@ -131,10 +131,9 @@ const TabPanel = ({
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: colors.headerBg,
-          height: '100%',
+          height: height ? `${height - tabHeaderHeight}px` : '100%',
           alignItems: 'center',
         }}>
-          {/* Unfold button at the top */}
           <div
             style={{
               padding: '12px',
@@ -152,7 +151,6 @@ const TabPanel = ({
             <FiChevronRight />
           </div>
 
-          {/* Vertical tabs with icons only */}
           {tabs.map((tab, index) => (
             <div
               key={index}
@@ -177,17 +175,18 @@ const TabPanel = ({
         </div>
       ) : (
         <div style={{
-          flex: 1,
-          overflow: 'auto',
-        }}>
+          height: tabContentHeight,
+          overflow: 'hidden',
+        }}
+>
           {tabs.map((tab, index) => (
             <div
               key={index}
               style={{
                 display: index === activeTabIndex ? 'block' : 'none',
-                padding: '10px',
                 height: '100%',
-                color: colors.text
+                color: colors.text,
+                overflow: 'auto',
               }}
             >
               {tab.content}
@@ -197,6 +196,6 @@ const TabPanel = ({
       )}
     </div>
   );
-};
+});
 
 export default TabPanel;

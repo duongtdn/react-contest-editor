@@ -25,7 +25,9 @@
     "@duongtdn/react-scrollbox": "^1.2.2",
     "monaco-ext": "^0.1.1",
     "react": "^19.1.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^15.6.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.27.0",
