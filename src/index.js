@@ -1,1 +1,1 @@
-export { default as default } from './components/ContestEditor.jsx';
+export { default as default } from './components/ContestEditor';
