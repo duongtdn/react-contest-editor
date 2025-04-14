@@ -133,7 +133,7 @@ const Editor = ({
     return () => {
       if (editorsRef.current) {
         editorsRef.current.forEach(editor => {
-          if (editor) editor.editor.dispose();
+          if (editor) editor.editor.instance.dispose();
         });
         editorsRef.current = [];
       }
